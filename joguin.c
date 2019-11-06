@@ -6,23 +6,22 @@ typedef struct{
     int x, y, existe;
 }tiro_t;
 
-
-//estrutura de um jogador
-typedef struct {
-    int x, y;
-    int nvidas;
-    tiro_t tiros[MAX_TIROS];
-}jogador_t;
-
-//estrutura de um inimigo
 typedef struct{
-    int x, y;
-    tiro_t tiros;
-}inimigo_t;
+    int x, y, nvidas=1;
+    tiro_t tiros[MAX_TIROS];
+} boneco_t;
+
+void vaiMatar(boneco_t *boneco, tiro_t *tiro){
+    if(tiro->x==boneco->x && tiro->y==boneco->y){
+
+    }
+
+}
 
 
 int main(){
-
+    int num = 5;
+    vaiMatar(&num);
     //
     /**
         vetor_para_checagem = [inimigo[0], inimigo[1]];
@@ -35,10 +34,16 @@ int main(){
         }
 
     **/
+    /**
 
-    jogador_t jogador = {20, 20, {0}};
+        Y
+      20 |    --             xx
+              30             40     X
+    **/
 
-    inimigo_t inimigo = {40, 20, {1,1}};
+                    /** X,  Y, tiros  */
+    boneco_t jogador = {20, 20, {0}};
+    boneco_t inimigo = {40, 20, {1,1}};
 
     jogador.tiros[0].x = 30;
     jogador.tiros[0].y = 20;
