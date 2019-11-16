@@ -12,34 +12,20 @@
 #define INIMIGO_CHECK 8 // inimigos que checaremos
 #define CHECAGEM_VAZIA -5
 
+#define CHANCE_DE_TIRO 200 // a chance de o inimigo dar um tiro, de 1 ao definido
 
 #define PAREDE 500
 
 #define MAX_TIROS 20
-#define VEL_BALA 10
+#define VEL_BALA 5
 
 #define LINHAS 35
 #define COLUNAS 415
-
 #define LARGURA 105
-#define ALTURA 36
 
 
 #define MIN_LIMIT 5
 #define MAX_LIMIT 29
-
-/**
-
-[-5, 2, -5, 9,...]
-
-for(i=0; i<INIMIGO_CHECK; i){
-    if(vetor_checagem[i]!=CHECAGEM_VAZIA){
-
-    }
-
-}
-
-**/
 
 /*-------------------------------*/
 /*------------Estruturas---------*/
@@ -105,20 +91,28 @@ int MinMax(int min, int max){
 }
 //sorteia os movimentos do inimigo
 
-void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo){
-    int minimo = 1, maximo = 6;
+void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo, boneco_t *jogador){
+    int minimo = 1, maximo = 6, andou_x=0;
     if(mapa[inimigo->y-1][inimigo->x] == PAREDE){
         minimo = 1;
         maximo = 3;
-    }
-    if(mapa[inimigo->y][inimigo->x] == PAREDE){
+    }else if(mapa[inimigo->y][inimigo->x] == PAREDE){
         minimo = 4;
         maximo = 6;
+    }else if(MinMax(1, 2)==2){
+        if(jogador->y > inimigo->y){
+            minimo = 2;
+            maximo = 3;
+        }else{
+            minimo = 4;
+            maximo = 5;
+        }
     }
 
     switch(MinMax(minimo, maximo)){
         case 1:
             inimigo->x += 1;
+            andou_x=1;
             break;
         case 2:
             inimigo->y += 1;
@@ -126,16 +120,26 @@ void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo){
         case 3:
             inimigo->x += 1;
             inimigo->y += 1;
+            andou_x=1;
             break;
         case 4:
             inimigo->x -= 1;
             inimigo->y -= 1;
+            andou_x=2;
             break;
         case 5:
             inimigo->y -= 1;
         case 6:
             inimigo->x -= 1;
+            andou_x=2;
         default: break;
+    }
+    if(andou_x>0){
+        if(andou_x==1 && inimigo->x>=415){
+            inimigo->x = 0;
+        }else if(inimigo->x<0){
+            inimigo->x = 415;
+        }
     }
     return;
 }
@@ -156,11 +160,11 @@ void atira(tiro_t tiro[], int prop, int x, int y){
 
 
 /***atualiza a tela***/
-int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t jogador, boneco_t inimigo[], int checagem[], tiro_t tiro[]){
+int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t inimigo[], int checagem[], tiro_t tiro[]){
     int i;
     int id;
     int x=0, y=0;
-    jogador.x += jogador.velocidade;
+//    jogador->x += jogador->velocidade;
     for(i=0; i<INIMIGO_CHECK; i++){
         if(checagem[i] != CHECAGEM_VAZIA){
             id = checagem[i];
@@ -169,8 +173,8 @@ int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t jogador, boneco_t ini
             //para testar limite superior:
           //  if(
          //   if(y < MIN_LIMIT || y > MAX_LIMIT){
-                atualizaInimigo(mapa, &inimigo[id]);
-                if(MinMax(0,5)==5){
+                atualizaInimigo(mapa, &inimigo[id], jogador);
+                if(MinMax(0,CHANCE_DE_TIRO)==CHANCE_DE_TIRO){
                     atira(tiro, 2, x, y);
                 }
            // }
@@ -180,7 +184,7 @@ int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t jogador, boneco_t ini
         if(tiro[i].prop!=0){
             if(tiro[i].prop==1){ // tiro do jogador
                 tiro[i].x += VEL_BALA;
-                if(tiro[i].x >= coluna + 105){
+                if(tiro[i].x >= coluna + 100 - jogador->x){
                     tiro[i].prop = 0;
                 }
             }else{ // tiro do inimigo
@@ -274,16 +278,16 @@ void le_mapa(FILE *arq, int mapa[][COLUNAS], boneco_t *jogador, boneco_t inimigo
 
 void gotoxy(int x,int y){ printf("%c[%d;%df",0x1B,y,x); }
 
-void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t jogador, boneco_t inimigo[], int checagem[], tiro_t tiro[], int pontuacao){
-    int i, id, linha=0, coluna=0, p, mudou=0, posicao_inimigo;
+void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t inimigo[], int checagem[], tiro_t tiro[], int *pontuacao){
+    int i, id, linha=0, coluna=0, p, reposiciona_escrita=0, posicao_inimigo;
 
-    printf("Vidas: %d Pontos: %d \n", jogador.nvidas, pontuacao);
+    printf("Vidas: %d Pontos: %d    | %d    |  %d   \n", jogador->nvidas, *pontuacao, atual, inimigo[0].x);
 
     /*** Gerando Jogador ***/
 
-    gotoxy(jogador.x, jogador.y+1);
+    gotoxy(jogador->x, jogador->y+1);
     printf("@");
-    gotoxy(jogador.x, jogador.y+2);
+    gotoxy(jogador->x, jogador->y+2);
     printf("@@@@");
 
     /*** Gerando Inimigos ***/
@@ -327,15 +331,15 @@ void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t jogador, boneco_t inimi
     /*** Gerando Paredes ***/
     while(linha<LINHAS){
         coluna=0;
-        mudou=0;
+        reposiciona_escrita=0; // quando zerado, reposiciona equivale a falso
         p = atual; //coluna auxiliar
         gotoxy(1+coluna, 2+linha);
-        while(coluna<105){
+        while(coluna<LARGURA){
             if(p>=415) p %=  415; //zera periodicamente para repetir o início da tela
 
             if(mapa[linha][p]==PAREDE){
-                if(mudou==1){ //
-                    mudou=0;
+                if(reposiciona_escrita==1){ //
+                    reposiciona_escrita=0;
                     gotoxy(1+coluna, 2+linha);
                 }
 
@@ -346,12 +350,10 @@ void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t jogador, boneco_t inimi
                 coluna+=mapa[linha][p];
                 p+=mapa[linha][p];
                 gotoxy(1+coluna, 2+linha);
-            //printf("L");
             }else{
-//            printf("0");
                 coluna++;
                 p++;
-                mudou=1;
+                reposiciona_escrita=1;
             }
         }
         printf("\n");
@@ -368,8 +370,10 @@ void printa(int pos, int linha, char *string){
 
 void FIM_DE_JOGO(int score){
     printa(2, 12, "FIM DE JOGO");
+
     printa(2, 18, "Pontuacao: ");
     printf("%d", score);
+
     printa(2, 26, "CREDITOS");
     printa(2, 28, "Matheus Costa        Terumi Tamai");
     printa(2, 32, "");
@@ -435,13 +439,16 @@ int main(){
 
         foto += jogador.velocidade;
 
+        if(foto<0) foto = 415;
+        else if(foto>415) foto=0;
+
         if(kbhit())
             controle(getchar(), &jogador, tiro);
 
 
         carregaChecagem(inimigo, checagem, foto);
         buscaTiro(&jogador, inimigo, checagem, tiro, &pontuacao);
-        atualizaTela(mapa, foto, jogador, inimigo, checagem, tiro);
+        atualizaTela(mapa, foto, &jogador, inimigo, checagem, tiro);
 
         printf("\033[H\033[J");
 
@@ -450,10 +457,10 @@ int main(){
             break;
         }
 
-        geraQuadro(mapa, foto, jogador, inimigo, checagem, tiro, pontuacao);
+        geraQuadro(mapa, foto, &jogador, inimigo, checagem, tiro, &pontuacao);
 
         // 17000
-        usleep(80000);
+        usleep(40000);
     }
 
     return 0;
