@@ -10,13 +10,13 @@
 
 #define TOTAL_INIMIGO 20 //numero máximo de inimigos em cada nivel
 #define INIMIGO_CHECK 8 // inimigos que checaremos
-#define CHECAGEM_VAZIA -5
+#define INIMIGO_MORTO -5
 
-#define CHANCE_DE_TIRO 200 // a chance de o inimigo dar um tiro, de 1 ao definido
+#define CHANCE_DE_TIRO 100 // a chance de o inimigo dar um tiro, de 1 ao definido
 
 #define PAREDE 500
 
-#define MAX_TIROS 20
+#define MAX_TIROS 200
 #define VEL_BALA 5
 
 #define LINHAS 35
@@ -45,7 +45,7 @@ typedef struct{
 
 
 
-void buscaTiro(boneco_t *jogador, boneco_t inimigo[], int checagem[], tiro_t tiro[], int * pontuacao){
+void buscaTiro(boneco_t *jogador, boneco_t inimigo[], int inimigo_vivo[], tiro_t tiro[], int * pontuacao){
     int i, j, // iteradores
         id; //variável auxiliar para guardar o id do inimigo
 
@@ -54,13 +54,13 @@ void buscaTiro(boneco_t *jogador, boneco_t inimigo[], int checagem[], tiro_t tir
 
             /*** Matando os Inimigos *****/
             if(tiro[i].prop==1){    //se o tiro é do jogador...
-                for(j=0; j<INIMIGO_CHECK; j++){ //percorre a lista de checagem dos inimigos na tela
-                    if(checagem[j]!=CHECAGEM_VAZIA){    //se o índice da checagem for diferente de vazio
-                        id = checagem[j];               //pega o índice do inimigo guardado na checagem
+                for(j=0; j<INIMIGO_CHECK; j++){ //percorre a lista de inimigos vivos dos inimigos na tela
+                    if(inimigo_vivo[j]!=INIMIGO_MORTO){    //se o índice da checagem for diferente de vazio
+                        id = inimigo_vivo[j];               //pega o índice do inimigo guardado na checagem
                         if(tiro[i].x<=inimigo[id].x && tiro[i].x+VEL_BALA>=inimigo[id].x &&
                             (tiro[i].y==inimigo[id].y || tiro[i].y==inimigo[id].y-1) ){   //se as coordenadas x e y do tiro == as do inimigo
                             inimigo[id].nvidas--;            //o inimigo perde a vida
-                            checagem[j] = CHECAGEM_VAZIA;   //e remove o índice do inimigo da checagem
+                            inimigo_vivo[j] = INIMIGO_MORTO;   //e remove o índice do inimigo da checagem
                             tiro[i].prop=0;                 //e o tiro deixa de existir
 //                            printf("O INIMIGO MORREU!!\n");
                             *pontuacao+=10;
@@ -86,11 +86,10 @@ void buscaTiro(boneco_t *jogador, boneco_t inimigo[], int checagem[], tiro_t tir
 }
 
 int MinMax(int min, int max){
-//    srand(time(0));
     return (min + (rand() % (max-min+1)));
 }
-//sorteia os movimentos do inimigo
 
+//sorteia os movimentos do inimigo
 void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo, boneco_t *jogador){
     int minimo = 1, maximo = 6, andou_x=0;
     if(mapa[inimigo->y-1][inimigo->x] == PAREDE){
@@ -160,17 +159,17 @@ void atira(tiro_t tiro[], int prop, int x, int y){
 
 
 /***atualiza a tela***/
-int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t inimigo[], int checagem[], tiro_t tiro[]){
+int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t inimigo[], int inimigo_vivo[], tiro_t tiro[]){
     int i;
     int id;
     int x=0, y=0;
 //    jogador->x += jogador->velocidade;
     for(i=0; i<INIMIGO_CHECK; i++){
-        if(checagem[i] != CHECAGEM_VAZIA){
-            id = checagem[i];
+        if(inimigo_vivo[i] != INIMIGO_MORTO){
+            id = inimigo_vivo[i];
             x = inimigo[id].x;
             y = inimigo[id].y;
-            //para testar limite superior:
+            //para testar limite superior:ŝ
           //  if(
          //   if(y < MIN_LIMIT || y > MAX_LIMIT){
                 atualizaInimigo(mapa, &inimigo[id], jogador);
@@ -189,7 +188,7 @@ int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t i
                 }
             }else{ // tiro do inimigo
                 tiro[i].x -= VEL_BALA;
-                if(tiro[i].x <= coluna){
+                if(tiro[i].x <= coluna - 100){
                     tiro[i].prop = 0;
                 }
             }
@@ -214,7 +213,7 @@ boneco_t carregaInimigo(int x, int y){
 }
 
 /**Checagem das posições dos inimigos**/
-void carregaChecagem(boneco_t inimigo[], int checagem[], int pos){
+void carregaChecagem(boneco_t inimigo[], int inimigo_vivo[], int pos){
 
     int i, j=0, // iteradores
         buscando; //auxiliar para verificar se a busca pelo índice vazio continua
@@ -225,8 +224,8 @@ void carregaChecagem(boneco_t inimigo[], int checagem[], int pos){
         if(inimigo[i].visto==0 && pos+LARGURA > inimigo[i].x){
             buscando = 1;
             do{
-                if(checagem[j]==CHECAGEM_VAZIA){    //busca um indice vazio na lista de checagem
-                    checagem[j] = i;                //para inserir o inimigo nesse índice
+                if(inimigo_vivo[j]==INIMIGO_MORTO){    //busca um indice vazio na lista de checagem
+                    inimigo_vivo[j] = i;                //para inserir o inimigo nesse índice
                     inimigo[i].visto=1;             //inimigo já foi visto na tela
                     buscando=0;                     //para de busca um índice vazio
                 }
@@ -278,10 +277,10 @@ void le_mapa(FILE *arq, int mapa[][COLUNAS], boneco_t *jogador, boneco_t inimigo
 
 void gotoxy(int x,int y){ printf("%c[%d;%df",0x1B,y,x); }
 
-void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t inimigo[], int checagem[], tiro_t tiro[], int *pontuacao){
+void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t inimigo[], int inimigo_vivo[], tiro_t tiro[], int *pontuacao){
     int i, id, linha=0, coluna=0, p, reposiciona_escrita=0, posicao_inimigo;
 
-    printf("Vidas: %d Pontos: %d    | %d    |  %d   \n", jogador->nvidas, *pontuacao, atual, inimigo[0].x);
+    printf("Vidas: %d Pontos: %d \n", jogador->nvidas, *pontuacao);
 
     /*** Gerando Jogador ***/
 
@@ -293,8 +292,8 @@ void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t ini
     /*** Gerando Inimigos ***/
     p = atual;
     for(i=0; i<INIMIGO_CHECK; i++){
-        if(checagem[i]!=CHECAGEM_VAZIA){
-            id = checagem[i];
+        if(inimigo_vivo[i]!=INIMIGO_MORTO){
+            id = inimigo_vivo[i];
             if(inimigo[id].y>0 && inimigo[id].x>0){
                 if(p>=415) p %= 415;
                 posicao_inimigo = inimigo[id].x - p;
@@ -365,7 +364,7 @@ void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t ini
 
 void printa(int pos, int linha, char *string){
     gotoxy(LARGURA/pos-strlen(string)/2,linha);
-    if(string!="") printf("%s", string);
+    if(strlen(string)>0) printf("%s", string);
 }
 
 void FIM_DE_JOGO(int score){
@@ -411,7 +410,9 @@ int main(){
     boneco_t inimigo[TOTAL_INIMIGO];
     tiro_t tiro[MAX_TIROS]={0};
     int mapa[LINHAS][COLUNAS];
-    int i, j, checagem[INIMIGO_CHECK];
+    int i, j;
+    int inimigo_vivo[INIMIGO_CHECK];
+
     int pontuacao=0;
 
 
@@ -423,7 +424,7 @@ int main(){
 
 
     for(i=0; i<INIMIGO_CHECK; i++){
-        checagem[i] = CHECAGEM_VAZIA;
+        inimigo_vivo[i] = INIMIGO_MORTO;
     }
 
 
@@ -446,9 +447,9 @@ int main(){
             controle(getchar(), &jogador, tiro);
 
 
-        carregaChecagem(inimigo, checagem, foto);
-        buscaTiro(&jogador, inimigo, checagem, tiro, &pontuacao);
-        atualizaTela(mapa, foto, &jogador, inimigo, checagem, tiro);
+        carregaChecagem(inimigo, inimigo_vivo, foto);
+        buscaTiro(&jogador, inimigo, inimigo_vivo, tiro, &pontuacao);
+        atualizaTela(mapa, foto, &jogador, inimigo, inimigo_vivo, tiro);
 
         printf("\033[H\033[J");
 
@@ -457,10 +458,10 @@ int main(){
             break;
         }
 
-        geraQuadro(mapa, foto, &jogador, inimigo, checagem, tiro, &pontuacao);
+        geraQuadro(mapa, foto, &jogador, inimigo, inimigo_vivo, tiro, &pontuacao);
 
         // 17000
-        usleep(40000);
+        usleep(20000);
     }
 
     return 0;
