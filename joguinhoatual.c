@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 
 #include "kbhit.c"
 
@@ -18,6 +19,7 @@
 
 #define MAX_TIROS 100
 #define VEL_BALA 5
+#define DURACAO_TIRO 15
 
 #define VEL_MIN -2
 #define VEL_MAX 2
@@ -36,13 +38,14 @@
 //estrutura do tiro
 typedef struct{
     int x, y,
-    prop; // 0: Inexistente, 1: Player, 2: Inimigo
-}tiro_t;
+        prop, // 0: Inexistente, 1: Player, 2: Inimigo
+        duracao;
+} tiro_t;
 
 typedef struct{
     int x, y,
-    nvidas,
-    velocidade
+        nvidas,
+        velocidade;
 } boneco_t;
 
 
@@ -55,6 +58,9 @@ void deletaInimigo(boneco_t inimigo[], int morto, int *inimigos_existentes){
 
 }
 
+int MinMax(int min, int max){
+    return (min + (rand() % (max-min+1)));
+}
 
 void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[], int * pontuacao, int *inimigos_existentes){
     int i, j, // iteradores
@@ -94,9 +100,6 @@ void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[], int * pontu
     return;
 }
 
-int MinMax(int min, int max){
-    return (min + (rand() % (max-min+1)));
-}
 
 
 
@@ -111,7 +114,7 @@ void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo, boneco_t *jogador){
         maximo = 6;
     }
 
-    switch(MinMax(minimo, maximo)){
+    switch(/*MinMax(minimo, maximo)*/ 0){
         case 1:
             inimigo->x += 1;
             andou_x=1;
@@ -137,10 +140,10 @@ void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo, boneco_t *jogador){
         default: break;
     }
     if(andou_x>0){
-        if(andou_x==1 && inimigo->x>=415){
+        if(andou_x==1 && inimigo->x>=COLUNAS){
             inimigo->x = 0;
         }else if(inimigo->x<0){
-            inimigo->x = 415;
+            inimigo->x = COLUNAS;
         }
     }
     return;
@@ -151,6 +154,7 @@ void atira(tiro_t tiro[], int prop, int x, int y){
     do{
         if(tiro[i].prop == 0){
             tiro[i].prop = prop;
+            tiro[i].duracao = DURACAO_TIRO;
             tiro[i].x = x;
             tiro[i].y = y;
             continua=0;
@@ -162,11 +166,19 @@ void atira(tiro_t tiro[], int prop, int x, int y){
 
 
 /***atualiza a tela***/
-int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *inimigos_existentes){
+int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *inimigos_existentes, int *animacao){
     int i;
     int id;
     int x=0, y=0;
-//    jogador->x += jogador->velocidade;
+
+    if(*animacao>0) *animacao -= 1;
+
+    if(mapa[jogador->y][jogador->x+coluna]==PAREDE){
+        jogador->nvidas--;
+        *animacao = 15;
+        jogador->y=(LINHAS / 2) + 1;
+    }
+
     for(i=0; i<*inimigos_existentes; i++){
         atualizaInimigo(mapa, &inimigo[i], jogador);
         if(MinMax(0,CHANCE_DE_TIRO)==CHANCE_DE_TIRO){
@@ -178,17 +190,15 @@ int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t i
         if(tiro[i].prop!=0){
             if(tiro[i].prop==1){ // tiro do jogador
                 tiro[i].x += VEL_BALA;
-                if(tiro[i].x>415) tiro[i].x = 0;
-                if(tiro[i].x >= coluna + LARGURA){
-                    tiro[i].prop = 0;
-                }
+                if(tiro[i].x>COLUNAS) tiro[i].x = 0;
             }else{ // tiro do inimigo
                 tiro[i].x -= VEL_BALA;
-                if(tiro[i].x<0) tiro[i].x=415;
-                if(tiro[i].x <= coluna - 100){
-                    tiro[i].prop = 0;
-                }
+                if(tiro[i].x<0) tiro[i].x=COLUNAS;
             }
+            // remove tiro após o fim da duração
+            if(tiro[i].duracao==0){
+                tiro[i].prop = 0;
+            }else tiro[i].duracao--;
         }
     }
     return x;
@@ -247,23 +257,36 @@ int le_mapa(FILE *arq, int mapa[][COLUNAS], boneco_t *jogador, boneco_t inimigo[
 
 void gotoxy(int x,int y){ printf("%c[%d;%df",0x1B,y,x); }
 
-void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *pontuacao, int *inimigos_existentes){
+void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *pontuacao, int *inimigos_existentes, int *animacao){
     int i, id, linha=0, coluna=0, p, reposiciona_escrita=0, posicao_inimigo;
 
-    printf("Vidas: %d Pontos: %d // %d\n", jogador->nvidas, *pontuacao, atual);
+    int mtx=0, mty=0;
+
+    for(i=0; i<MAX_TIROS; i++){
+        if(tiro[i].prop==1){
+            mtx = tiro[i].x;
+            mty = tiro[i].y;
+        }
+    }
+
+    printf("Vidas: %d Pontos: %d // %d  || %d:%d\n", jogador->nvidas, *pontuacao, atual, mtx, mty);
 
     /*** Gerando Jogador ***/
 
-    gotoxy(jogador->x, jogador->y+1);
-    printf("@");
-    gotoxy(jogador->x, jogador->y+2);
-    printf("@@@@");
+    if(*animacao%3==0){
+
+        gotoxy(jogador->x, jogador->y+1);
+        printf("@");
+        gotoxy(jogador->x, jogador->y+2);
+        printf("@@@@");
+
+    }
 
     /*** Gerando Inimigos ***/
     p = atual;
 
     for(i=0; i<*inimigos_existentes; i++){
-                if(p>=415) p %= 415;
+                if(p>=COLUNAS) p %= COLUNAS;
                 posicao_inimigo = inimigo[i].x - p;
                 if(p <= 310 && posicao_inimigo>0 && inimigo[i].x<LARGURA+p){
                     gotoxy(posicao_inimigo, inimigo[i].y+1);
@@ -272,7 +295,7 @@ void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t ini
                     printf("XX");
                 }else if(p>310){
                     posicao_inimigo = inimigo[i].x - p;
-                    if(inimigo[i].x<300) posicao_inimigo += 415;
+                    if(inimigo[i].x<300) posicao_inimigo += COLUNAS;
 
                     if(posicao_inimigo>0 && posicao_inimigo<104){
                         gotoxy(posicao_inimigo, inimigo[i].y+1);
@@ -287,7 +310,7 @@ void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t ini
     /*** Gerando Tiros ***/
     for(i=0; i<MAX_TIROS; i++){
         if(tiro[i].prop!=0){
-            gotoxy(tiro[i].prop==1 ? tiro[i].x - p : tiro[i].x , tiro[i].y);
+            gotoxy(fabs(tiro[i].prop==1 ? tiro[i].x - p : tiro[i].x), fabs(tiro[i].y));
             if(tiro[i].prop==1) printf("--"); else printf(".");
         }
     }
@@ -299,7 +322,7 @@ void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t ini
         p = atual; //coluna auxiliar
         gotoxy(1+coluna, 2+linha);
         while(coluna<LARGURA){
-            if(p>=415) p %=  415; //zera periodicamente para repetir o início da tela
+            if(p>=COLUNAS) p %=  COLUNAS; //zera periodicamente para repetir o início da tela
 
             if(mapa[linha][p]==PAREDE){
                 if(reposiciona_escrita==1){ //
@@ -390,6 +413,8 @@ int main(){
 
     int foto = 0;
 
+    int animacao = 0;
+
     FILE *arquivo;
 
 
@@ -411,22 +436,21 @@ int main(){
 
         foto += jogador.velocidade;
 
-        if(foto<0) foto = 415;
-        else if(foto>415) foto=0;
+        if(foto<0) foto = COLUNAS;
+        else if(foto>=COLUNAS) foto=0;
 
         if(kbhit())
             controle(getchar(), &jogador, tiro, mapa, foto);
 
         buscaTiro(&jogador, inimigo, tiro, &pontuacao, &inimigos_existentes);
-        atualizaTela(mapa, foto, &jogador, inimigo, tiro, &inimigos_existentes);
-
+        atualizaTela(mapa, foto, &jogador, inimigo, tiro, &inimigos_existentes, &animacao);
 
         if(jogador.nvidas==0){
             FIM_DE_JOGO(pontuacao);
             break;
         }
 
-        geraQuadro(mapa, foto, &jogador, inimigo, tiro, &pontuacao, &inimigos_existentes);
+        geraQuadro(mapa, foto, &jogador, inimigo, tiro, &pontuacao, &inimigos_existentes, &animacao);
 
         // 17000
         usleep(40000);
