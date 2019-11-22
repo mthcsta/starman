@@ -12,14 +12,15 @@
 #define INIMIGO_CHECK 8 // inimigos que checaremos
 #define INIMIGO_MORTO -5
 
-#define CHANCE_DE_TIRO 150 // a chance de o inimigo dar um tiro, de 1 ao definido
+#define CHANCE_DE_TIRO 200 // a chance de o inimigo dar um tiro, de 1 ao definido
 
 #define PAREDE 500
 
 #define MAX_TIROS 200
 #define VEL_BALA 5
-#define VEL_MAX 2
+
 #define VEL_MIN 1
+#define VEL_MAX 2
 
 #define LINHAS 35
 #define COLUNAS 415
@@ -35,10 +36,10 @@
 //estrutura do tiro
 typedef struct{
     int x, y,
-    prop; // 0: Inexistente, 1: Player, 2: Inimigo
+    prop; // 0: Inexistente, 1: Jogador, 2: Inimigo
 }tiro_t;
 
-//estrutura para um jogador ou inimigo
+//estrutura da personagem que pode ser: Jogador ou Inimigo
 typedef struct{
     int x, y,
     nvidas,
@@ -47,12 +48,13 @@ typedef struct{
 } boneco_t;
 
 
-
+//Recebe uma estrutura jogador, uma estrutura inimigo, uma lista de inimigos vivos, uma lista dos tiros
+//e um total de pontuação do jogador até o momento
 void buscaTiro(boneco_t *jogador, boneco_t inimigo[], int inimigo_vivo[], tiro_t tiro[], int * pontuacao){
     int i, j, // iteradores
         id; //variável auxiliar para guardar o id do inimigo
 
-    for(i=0; i<MAX_TIROS; i++){
+    for(i=0; i<MAX_TIROS; i++){//itera sobre a lista dos tiros
         if(tiro[i].prop>0){ //se o tiro existe, verifica sua posição em relação ao boneco
 
             /*** Matando os Inimigos *****/
@@ -66,20 +68,20 @@ void buscaTiro(boneco_t *jogador, boneco_t inimigo[], int inimigo_vivo[], tiro_t
                             inimigo_vivo[j] = INIMIGO_MORTO;   //e remove o índice do inimigo da checagem
                             tiro[i].prop=0;                 //e o tiro deixa de existir
 //                            printf("O INIMIGO MORREU!!\n");
-                            *pontuacao+=10;
+                            *pontuacao+=10;//soma 10 à pontuação do jogador a cada inimigo morto
                         }
                     }
                 }
             }
             /*** Matando o Jogador *****/
-            //Se as coordenadas x e y do tiro coincidem com as do jogador, o jogador perde uma vida
+            //Se as coordenadas x e y do tiro do inimigo coincidem com as do jogador, o jogador perde uma vida
             else if(tiro[i].prop==2 && tiro[i].x>=jogador->x && tiro[i].x-VEL_BALA<=jogador->x &&
                     (tiro[i].y==jogador->y || tiro[i].y==jogador->y-1)){
                 jogador->nvidas--;
                 tiro[i].prop=0; //o tiro deixa de existir
-                printf("morreu um pouco\n");
+               // printf("morreu um pouco\n");
                 if(jogador->nvidas == 0){ //se o jogador ficar com 0 vidas, game-over pra ele
-                    printf("ja era pra ti\n");
+                //printf("ja era pra ti\n");
                 }
             }
 
@@ -95,7 +97,7 @@ int MinMax(int min, int max){
 //sorteia os movimentos do inimigo
 void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo, boneco_t *jogador){
     int minimo = 1, maximo = 6, andou_x=0;
-    if(mapa[inimigo->y-1][inimigo->x] == PAREDE){
+    if(mapa[inimigo->y-1][inimigo->x] == PAREDE){ //verifica se a próxima posição para baixo é uma parede
         minimo = 1;
         maximo = 3;
     }else if(mapa[inimigo->y][inimigo->x] == PAREDE){
@@ -345,7 +347,7 @@ void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t ini
                     gotoxy(1+coluna, 2+linha);
                 }
 
-                printf("\u2588");
+                printf("C");
                 coluna++;
                 p++;
             }else if(mapa[linha][p]>0){
@@ -391,13 +393,15 @@ void controle(int c, boneco_t * jogador, tiro_t tiro[]){
             jogador->y-=1;
             break;
         case 'd':
-            if(jogador->velocidade < VEL_MAX){ //atribui uma velocidade máxima para n acelerar absurdamente
-                jogador->velocidade++;
+            if(jogador->velocidade < VEL_MAX){ //confere se a velocidade eh menor que a max
+                jogador->velocidade++;         //antes de acelerar mais
+                break;
             }
             break;
         case 'a':
-            if(jogador->velocidade >VEL_MIN){ //atribui uma velocidade minima para não voltar do nada
-                jogador->velocidade--;
+            if(jogador->velocidade > VEL_MIN){ //confere se a velocidade ainda eh maior que a min
+                jogador->velocidade--;         //antes de desacelerar
+                break;
             }
             break;
         case ' ':
