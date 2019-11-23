@@ -17,6 +17,8 @@
 
 #define PAREDE 500
 
+#define DURACAO_ANIMACAO 15
+
 #define MAX_TIROS 100
 #define VEL_BALA 5
 #define DURACAO_TIRO 15
@@ -62,7 +64,7 @@ int MinMax(int min, int max){
     return (min + (rand() % (max-min+1)));
 }
 
-void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[], int * pontuacao, int *inimigos_existentes){
+void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[], int * pontuacao, int *inimigos_existentes, int *animacao){
     int i, j, // iteradores
         id; //variável auxiliar para guardar o id do inimigo
 
@@ -88,9 +90,9 @@ void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[], int * pontu
             }
             /*** Matando o Jogador por tiros *****/
             //Se as coordenadas x e y do tiro coincidem com as do jogador, o jogador perde uma vida
-            else if(tiro[i].prop==2 && tiro[i].x>=jogador->x && tiro[i].x-VEL_BALA<=jogador->x &&
+            else if(*animacao==0 && tiro[i].prop==2 && tiro[i].x>=jogador->x && tiro[i].x-VEL_BALA<=jogador->x &&
                     (tiro[i].y==jogador->y+2 || tiro[i].y==jogador->y+1)){
-
+                *animacao = DURACAO_ANIMACAO;
                 jogador->nvidas--;
                 tiro[i].prop=0; //o tiro deixa de existir
             }
@@ -175,7 +177,7 @@ int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t i
 
     if(mapa[jogador->y][jogador->x+coluna]==PAREDE){
         jogador->nvidas--;
-        *animacao = 15;
+        *animacao = DURACAO_ANIMACAO;
         jogador->y=(LINHAS / 2) + 1;
     }
 
@@ -442,7 +444,7 @@ int main(){
         if(kbhit())
             controle(getchar(), &jogador, tiro, mapa, foto);
 
-        buscaTiro(&jogador, inimigo, tiro, &pontuacao, &inimigos_existentes);
+        buscaTiro(&jogador, inimigo, tiro, &pontuacao, &inimigos_existentes, &animacao);
         atualizaTela(mapa, foto, &jogador, inimigo, tiro, &inimigos_existentes, &animacao);
 
         if(jogador.nvidas==0){
