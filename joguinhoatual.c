@@ -182,6 +182,13 @@ int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t i
     }
 
     for(i=0; i<*inimigos_existentes; i++){
+        
+        if(jogador->x+coluna == inimigo[i].x && 
+            (fabs(jogador->y - inimigo[i].y) <= 1)){
+            jogador->nvidas--;
+            *animacao = DURACAO_ANIMACAO;
+        }
+
         atualizaInimigo(mapa, &inimigo[i], jogador);
         if(MinMax(0,CHANCE_DE_TIRO)==CHANCE_DE_TIRO){
             atira(tiro, 2, inimigo[i].x, inimigo[i].y);
