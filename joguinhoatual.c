@@ -268,7 +268,7 @@ int le_mapa(FILE *arq, int mapa[][COLUNAS], boneco_t *jogador, boneco_t inimigo[
     return id;
 }
 
-void gotoxy(int x,int y){ printf("%c[%d;%df",0x1B,y,x); }
+void gotoxy(int x,int y){ printf("%c[%d;%df",0x1B,2+y,1+x); }
 
 int geraPosicao(int x, int posicao){
     int reposicao = x - posicao;
@@ -302,9 +302,9 @@ void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t i
 
     if(*animacao%3==0){
 
-        gotoxy(1+jogador->x, jogador->y+1);
+        gotoxy(jogador->x, jogador->y-1);
         printf("@");
-        gotoxy(1+jogador->x, jogador->y+2);
+        gotoxy(jogador->x, jogador->y);
         printf("@@@@");
 
     }
@@ -314,9 +314,9 @@ void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t i
     for(i=0; i<*inimigos_existentes; i++){
         posicao_inimigo = geraPosicao(inimigo[i].x, posicao);
         if(posicao_inimigo>0){
-            gotoxy(1+posicao_inimigo, inimigo[i].y+1);
+            gotoxy(posicao_inimigo, inimigo[i].y-1);
             printf("XX");
-            gotoxy(1+posicao_inimigo, inimigo[i].y+2);
+            gotoxy(posicao_inimigo, inimigo[i].y);
             printf("XX");
         }
     }
@@ -326,7 +326,7 @@ void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t i
         if(tiro[i].prop!=0){
             posicao_inimigo = geraPosicao(tiro[i].x, posicao);
             if(posicao_inimigo>0){
-                gotoxy(1+posicao_inimigo, tiro[i].y+2);
+                gotoxy(posicao_inimigo, tiro[i].y);
                 if(tiro[i].prop==1) printf("--"); else printf(".");
             }
         }
@@ -337,14 +337,14 @@ void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t i
         coluna=0;
         reposiciona_escrita=0; // quando zerado, reposiciona equivale a falso
         p = posicao; //coluna auxiliar
-        gotoxy(1+coluna, 2+linha);
+        gotoxy(coluna, linha);
         while(coluna<LARGURA){
             if(p>=COLUNAS) p %=  COLUNAS; //zera periodicamente para repetir o início da tela
 
             if(mapa[linha][p]==PAREDE){
                 if(reposiciona_escrita==1){ //
                     reposiciona_escrita=0;
-                    gotoxy(1+coluna, 2+linha);
+                    gotoxy(coluna, linha);
                 }
 
                 printf("\u2588");
@@ -353,7 +353,7 @@ void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t i
             }else if(mapa[linha][p]>0){
                 coluna+=mapa[linha][p];
                 p+=mapa[linha][p];
-                gotoxy(1+coluna, 2+linha);
+                gotoxy(coluna, linha);
             }else{
                 coluna++;
                 p++;
@@ -421,63 +421,73 @@ void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int
     return;
 }
 
-int main(){
-
+void partida(char nome_mapa[], boneco_t * jogador, int * pontuacao){
                     /** X,  Y, vidas, velocidade  */
-    boneco_t jogador = {0, 0, 9, 0};
     boneco_t inimigo[TOTAL_INIMIGO];
     tiro_t tiro[MAX_TIROS]={0};
     int mapa[LINHAS][COLUNAS];
     int i, j;
     int inimigos_existentes;
-
-    int pontuacao=0;
-
     int foto = 0;
-
     int animacao = 0;
     int intervalo = 0;
 
     FILE *arquivo;
+    
 
+    arquivo = fopen(nome_mapa, "r");
 
+    inimigos_existentes = le_mapa(arquivo, mapa, jogador, inimigo);
 
-
-    arquivo = fopen("mapa_exemplo.txt", "r");
-
-    inimigos_existentes = le_mapa(arquivo, mapa, &jogador, inimigo);
-
+    fclose(arquivo);
 
     while(1){
 
         printf("\033[H\033[J");
 
-        if(inimigos_existentes<=0){
-            FIM_DE_JOGO(pontuacao + (jogador.nvidas*10));
-            break;
-        }
-
-        foto += jogador.velocidade;
+        foto += jogador->velocidade;
 
         if(foto<0) foto = COLUNAS;
         else if(foto>=COLUNAS) foto=0;
 
         if(kbhit())
-            controle(getchar(), &jogador, tiro, mapa, foto, &intervalo);
+            controle(getchar(), jogador, tiro, mapa, foto, &intervalo);
 
-        buscaTiro(&jogador, inimigo, tiro, foto, &pontuacao, &inimigos_existentes, &animacao);
-        atualizaTela(mapa, foto, &jogador, inimigo, tiro, &inimigos_existentes, &animacao, &intervalo);
+        buscaTiro(jogador, inimigo, tiro, foto, pontuacao, &inimigos_existentes, &animacao);
+        atualizaTela(mapa, foto, jogador, inimigo, tiro, &inimigos_existentes, &animacao, &intervalo);
 
-        if(jogador.nvidas==0){
-            FIM_DE_JOGO(pontuacao);
+        // finaliza partida:
+        if(jogador->nvidas==0 || inimigos_existentes<=0){
             break;
         }
 
-        geraQuadro(mapa, foto, &jogador, inimigo, tiro, &pontuacao, &inimigos_existentes, &animacao);
+        geraQuadro(mapa, foto, jogador, inimigo, tiro, pontuacao, &inimigos_existentes, &animacao);
 
         // 17000
         usleep(40000);
     }
+
+    return;
+}
+
+int main(){
+
+    int i=0;
+    char * lista_mapas[3] = {"mapa_exemplo.txt", "mapa_turmac.txt"};
+    int numero_mapa = 0;
+
+    int pontuacao=0;
+
+    boneco_t jogador = {0, 0, 20, 0};
+
+
+    do{
+        partida(lista_mapas[i], &jogador, &pontuacao);
+        i++;
+    } while(jogador.nvidas>0 && i<2);
+
+    FIM_DE_JOGO(pontuacao + (jogador.nvidas * 100));
+
 
     return 0;
 }
