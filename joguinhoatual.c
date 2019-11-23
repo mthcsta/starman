@@ -13,7 +13,7 @@
 #define TOTAL_INIMIGO 20 //numero máximo de inimigos em cada nivel
 #define INIMIGO_MORTO -5
 
-#define CHANCE_DE_TIRO 100 // a chance de o inimigo dar um tiro, de 1 ao definido
+#define CHANCE_DE_TIRO 50 // a chance de o inimigo dar um tiro, de 1 ao definido
 
 #define PAREDE 500
 
@@ -23,6 +23,7 @@
 #define VEL_BALA 5
 #define DURACAO_TIRO 15
 
+#define INTERVALO_TIRO 10
 #define VEL_MIN -2
 #define VEL_MAX 2
 
@@ -64,7 +65,7 @@ int MinMax(int min, int max){
     return (min + (rand() % (max-min+1)));
 }
 
-void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[], int * pontuacao, int *inimigos_existentes, int *animacao){
+void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[],int posicao, int * pontuacao, int *inimigos_existentes, int *animacao){
     int i, j, // iteradores
         id; //variável auxiliar para guardar o id do inimigo
 
@@ -76,7 +77,7 @@ void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[], int * pontu
                 j = 0;//indice do inimigo
                 while(inimigo[j].nvidas>0 && j < TOTAL_INIMIGO){ //se o inimigo está vivo
                         if(tiro[i].x<=inimigo[j].x && tiro[i].x+VEL_BALA>=inimigo[j].x &&//confere as coordenandas do inimigo com as do tiro
-                            (tiro[i].y==inimigo[j].y+2 || tiro[i].y==inimigo[j].y+1) ){   //se as coordenadas x e y do tiro == as do inimigo
+                            (tiro[i].y==inimigo[j].y || tiro[i].y==inimigo[j].y-1) ){   //se as coordenadas x e y do tiro == as do inimigo
                             inimigo[j].nvidas--;            //o inimigo perde a vida
                             if (inimigo[j].nvidas == 0){    //se o inimigo estiver morto
                                 deletaInimigo(inimigo, j, inimigos_existentes);  //chamamos a funcao pra deleta-lo do vetor
@@ -84,17 +85,19 @@ void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[], int * pontu
                             tiro[i].prop=0;                 //e o tiro deixa de existir
                             *pontuacao+=10; //o jogador ganha 10 pontos
                             j = TOTAL_INIMIGO; //finaliza o laco desse tiro
+                            printf("\a");
                         }
                         j++;
                 }
             }
             /*** Matando o Jogador por tiros *****/
             //Se as coordenadas x e y do tiro coincidem com as do jogador, o jogador perde uma vida
-            else if(*animacao==0 && tiro[i].prop==2 && tiro[i].x>=jogador->x && tiro[i].x-VEL_BALA<=jogador->x &&
-                    (tiro[i].y==jogador->y+2 || tiro[i].y==jogador->y+1)){
+            else if(*animacao==0 && tiro[i].prop==2 && tiro[i].x>=jogador->x+posicao && tiro[i].x-VEL_BALA<=jogador->x+posicao &&
+                    (tiro[i].y==jogador->y || tiro[i].y==jogador->y-1)){
                 *animacao = DURACAO_ANIMACAO;
                 jogador->nvidas--;
                 tiro[i].prop=0; //o tiro deixa de existir
+                printf("\a");                
             }
 
         }
@@ -168,14 +171,15 @@ void atira(tiro_t tiro[], int prop, int x, int y){
 
 
 /***atualiza a tela***/
-int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *inimigos_existentes, int *animacao){
+int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *inimigos_existentes, int *animacao, int *intervalo){
     int i;
     int id;
     int x=0, y=0;
 
     if(*animacao>0) *animacao -= 1;
+    if(*intervalo>0) *intervalo -= 1;
 
-    if(mapa[jogador->y][jogador->x+coluna]==PAREDE){
+    if(mapa[jogador->y][jogador->x+coluna]==PAREDE || mapa[jogador->y][jogador->x+2+coluna]==PAREDE || mapa[jogador->y-1][jogador->x+coluna]==PAREDE){
         jogador->nvidas--;
         *animacao = DURACAO_ANIMACAO;
         jogador->y=(LINHAS / 2) + 1;
@@ -266,7 +270,21 @@ int le_mapa(FILE *arq, int mapa[][COLUNAS], boneco_t *jogador, boneco_t inimigo[
 
 void gotoxy(int x,int y){ printf("%c[%d;%df",0x1B,y,x); }
 
-void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *pontuacao, int *inimigos_existentes, int *animacao){
+int geraPosicao(int x, int posicao){
+    int reposicao = x - posicao;
+    if(posicao <= (COLUNAS - LARGURA) && reposicao>0 && x<LARGURA+posicao){
+        return reposicao;
+    }else if(posicao>(COLUNAS - LARGURA)){
+        reposicao = x - posicao;
+        if(x<(COLUNAS - LARGURA)) reposicao += COLUNAS;
+        if(reposicao>0 && reposicao<(LARGURA-1)){
+            return reposicao;
+        }
+    }
+    return 0;
+}
+
+void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *pontuacao, int *inimigos_existentes, int *animacao){
     int i, id, linha=0, coluna=0, p, reposiciona_escrita=0, posicao_inimigo;
 
     int mtx=0, mty=0;
@@ -278,49 +296,39 @@ void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t ini
         }
     }
 
-    printf("Vidas: %d Pontos: %d // %d  || %d:%d\n", jogador->nvidas, *pontuacao, atual, mtx, mty);
+    printf("Vidas: %d Pontos: %d // %d / %d  || %d:%d\n", jogador->nvidas, *pontuacao, posicao, (posicao+jogador->x) % COLUNAS, mtx, mty);
 
     /*** Gerando Jogador ***/
 
     if(*animacao%3==0){
 
-        gotoxy(jogador->x, jogador->y+1);
+        gotoxy(1+jogador->x, jogador->y+1);
         printf("@");
-        gotoxy(jogador->x, jogador->y+2);
+        gotoxy(1+jogador->x, jogador->y+2);
         printf("@@@@");
 
     }
 
     /*** Gerando Inimigos ***/
-    p = atual;
 
     for(i=0; i<*inimigos_existentes; i++){
-                if(p>=COLUNAS) p %= COLUNAS;
-                posicao_inimigo = inimigo[i].x - p;
-                if(p <= 310 && posicao_inimigo>0 && inimigo[i].x<LARGURA+p){
-                    gotoxy(posicao_inimigo, inimigo[i].y+1);
-                    printf("XX");
-                    gotoxy(posicao_inimigo, inimigo[i].y+2);
-                    printf("XX");
-                }else if(p>310){
-                    posicao_inimigo = inimigo[i].x - p;
-                    if(inimigo[i].x<300) posicao_inimigo += COLUNAS;
-
-                    if(posicao_inimigo>0 && posicao_inimigo<104){
-                        gotoxy(posicao_inimigo, inimigo[i].y+1);
-                        printf("XX");
-                        gotoxy(posicao_inimigo, inimigo[i].y+2);
-                        printf("XX");
-                    }
-
-                }
+        posicao_inimigo = geraPosicao(inimigo[i].x, posicao);
+        if(posicao_inimigo>0){
+            gotoxy(1+posicao_inimigo, inimigo[i].y+1);
+            printf("XX");
+            gotoxy(1+posicao_inimigo, inimigo[i].y+2);
+            printf("XX");
+        }
     }
 
     /*** Gerando Tiros ***/
     for(i=0; i<MAX_TIROS; i++){
         if(tiro[i].prop!=0){
-            gotoxy(fabs(tiro[i].prop==1 ? tiro[i].x - p : tiro[i].x), fabs(tiro[i].y));
-            if(tiro[i].prop==1) printf("--"); else printf(".");
+            posicao_inimigo = geraPosicao(tiro[i].x, posicao);
+            if(posicao_inimigo>0){
+                gotoxy(1+posicao_inimigo, tiro[i].y+2);
+                if(tiro[i].prop==1) printf("--"); else printf(".");
+            }
         }
     }
 
@@ -328,7 +336,7 @@ void geraQuadro(int mapa[][COLUNAS], int atual, boneco_t * jogador, boneco_t ini
     while(linha<LINHAS){
         coluna=0;
         reposiciona_escrita=0; // quando zerado, reposiciona equivale a falso
-        p = atual; //coluna auxiliar
+        p = posicao; //coluna auxiliar
         gotoxy(1+coluna, 2+linha);
         while(coluna<LARGURA){
             if(p>=COLUNAS) p %=  COLUNAS; //zera periodicamente para repetir o início da tela
@@ -375,7 +383,9 @@ void FIM_DE_JOGO(int score){
     printa(2, 32, "");
 }
 
-void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int foto){
+void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int foto, int *intervalo){
+    
+    int reposiciona;
 
     c = tolower(c);
 
@@ -399,7 +409,10 @@ void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int
             }
             break;
         case ' ':
-            atira(tiro, 1, jogador->x+foto, jogador->y+2);
+            if(*intervalo==0){
+                atira(tiro, 1, (jogador->x + foto) % COLUNAS, jogador->y);
+                *intervalo = INTERVALO_TIRO;
+            }
             break;
 
         default:
@@ -411,7 +424,7 @@ void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int
 int main(){
 
                     /** X,  Y, vidas, velocidade  */
-    boneco_t jogador = {0, 0, 9, 1};
+    boneco_t jogador = {0, 0, 9, 0};
     boneco_t inimigo[TOTAL_INIMIGO];
     tiro_t tiro[MAX_TIROS]={0};
     int mapa[LINHAS][COLUNAS];
@@ -423,6 +436,7 @@ int main(){
     int foto = 0;
 
     int animacao = 0;
+    int intervalo = 0;
 
     FILE *arquivo;
 
@@ -449,10 +463,10 @@ int main(){
         else if(foto>=COLUNAS) foto=0;
 
         if(kbhit())
-            controle(getchar(), &jogador, tiro, mapa, foto);
+            controle(getchar(), &jogador, tiro, mapa, foto, &intervalo);
 
-        buscaTiro(&jogador, inimigo, tiro, &pontuacao, &inimigos_existentes, &animacao);
-        atualizaTela(mapa, foto, &jogador, inimigo, tiro, &inimigos_existentes, &animacao);
+        buscaTiro(&jogador, inimigo, tiro, foto, &pontuacao, &inimigos_existentes, &animacao);
+        atualizaTela(mapa, foto, &jogador, inimigo, tiro, &inimigos_existentes, &animacao, &intervalo);
 
         if(jogador.nvidas==0){
             FIM_DE_JOGO(pontuacao);
