@@ -1,39 +1,41 @@
 #include <stdio.h>
-#include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
 
-#include "kbhit.c"
 
-
-
-#define TOTAL_INIMIGO 20 //numero máximo de inimigos em cada nivel
-#define INIMIGO_MORTO -5
-
-#define CHANCE_DE_TIRO 50 // a chance de o inimigo dar um tiro, de 1 ao definido
-
+// Jogo
 #define PAREDE 500
-
-#define DURACAO_ANIMACAO 15
-
-#define MAX_TIROS 100
-#define VEL_BALA 5
-#define DURACAO_TIRO 15
-
-#define INTERVALO_TIRO 10
-#define VEL_MIN 1
-#define VEL_MAX 2
-
 #define LINHAS 35
 #define COLUNAS 415
 #define LARGURA 105
 
+// Tiro
+#define MAX_TIROS 100
+#define VEL_BALA 5
+#define DURACAO_TIRO 20
 
-#define MIN_LIMIT 5
-#define MAX_LIMIT 29
+// Jogador
+#define DURACAO_ANIMACAO 15
+#define INTERVALO_TIRO 10
+#define VEL_MIN -3
+#define VEL_MAX 2
+
+// Inimigo
+#define TOTAL_INIMIGO 20 //numero máximo de inimigos em cada nivel
+#define INIMIGO_MORTO -5
+#define CHANCE_DE_TIRO 50 // a chance de o inimigo dar um tiro, de 1 ao definido
+
+
+
+
+/*-------------------------------*/
+/*--------Meus Includes----------*/
+#include "kbhit.c"
+#include "auxiliares.c"
+
 
 /*-------------------------------*/
 /*------------Estruturas---------*/
@@ -61,10 +63,6 @@ void deletaInimigo(boneco_t inimigo[], int morto, int *inimigos_existentes){
 
 }
 
-//sorteia os movimentos do inimigo
-int MinMax(int min, int max){
-    return (min + (rand() % (max-min+1)));
-}
 /**Verifica as posicoes relativas entre o jogador e o tiro do inimigo, e entre o inimigo e o tiro do jogador.
    Computa os pontos ganhos a cada inimigo morto e as vidas perdidas por tiros do inimigo.
 **/
@@ -79,7 +77,7 @@ void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[],int posicao,
             /*** Matando os Inimigos *****/
             if(tiro[i].prop==1){    //se o tiro é do jogador...
                 j = 0;//indice do inimigo
-                while(inimigo[j].nvidas>0 && j < TOTAL_INIMIGO){ //se o inimigo está vivo
+                while(j<*inimigos_existentes){ //se o inimigo está vivo
                         if(tiro[i].x<=inimigo[j].x && tiro[i].x+VEL_BALA>=inimigo[j].x &&//confere as coordenandas do inimigo com as do tiro
                             (tiro[i].y==inimigo[j].y || tiro[i].y==inimigo[j].y-1) ){   //se as coordenadas x e y do tiro == as do inimigo
                             inimigo[j].nvidas--;            //o inimigo perde a vida
@@ -112,41 +110,42 @@ void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[],int posicao,
 
 
 
-
+int ehParede(int mapa[][COLUNAS], int x,int y){
+    return mapa[y][x] == PAREDE;
+}
 
 void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo, boneco_t *jogador){
-    int minimo = 1, maximo = 6, andou_x=0;
-    if(mapa[inimigo->y-1][inimigo->x] == PAREDE){
-        minimo = 1;
-        maximo = 3;
-    }else if(mapa[inimigo->y][inimigo->x] == PAREDE){
-        minimo = 4;
-        maximo = 6;
-    }
+    int minimo = 1, maximo = 5, andou_x=0;
 
     switch(MinMax(minimo, maximo)){
         case 1:
-            inimigo->x += 1;
-            andou_x=1;
+            if(!ehParede(mapa, inimigo->x, inimigo->y+1))
+                inimigo->y += 1;
             break;
         case 2:
-            inimigo->y += 1;
+            if(!ehParede(mapa, inimigo->x, inimigo->y-2) && !ehParede(mapa, inimigo->x, inimigo->y-1))
+                inimigo->y -= 1;
             break;
+
         case 3:
-            inimigo->x += 1;
-            inimigo->y += 1;
-            andou_x=1;
-            break;
+            if(!ehParede(mapa, inimigo->x-1, inimigo->y+1) && !ehParede(mapa, inimigo->x-1, inimigo->y) && !ehParede(mapa, inimigo->x-1, inimigo->y-2)){
+                inimigo->x -= 1;
+                inimigo->y += 1;
+            }
+            break;        
         case 4:
-            inimigo->x -= 1;
-            inimigo->y -= 1;
-            andou_x=2;
+            if(!ehParede(mapa, inimigo->x-1, inimigo->y-2) && !ehParede(mapa, inimigo->x-1, inimigo->y) && !ehParede(mapa, inimigo->x-1, inimigo->y-1)){
+                inimigo->x -= 1;
+                inimigo->y -= 1;
+                andou_x=2;
+            }
             break;
         case 5:
-            inimigo->y -= 1;
-        case 6:
-            inimigo->x -= 1;
-            andou_x=2;
+            if(!ehParede(mapa, inimigo->x-1, inimigo->y)){
+                inimigo->x -= 1;
+                andou_x=2;
+            }
+            break;
         default: break;
     }
     if(andou_x>0){
@@ -258,9 +257,11 @@ int le_mapa(FILE *arq, int mapa[][COLUNAS], boneco_t *jogador, boneco_t inimigo[
                     mapa[y][x] = 0;
                     pulador++;
                 }else if(c=='X'){
+                    mapa[y][x] = 0;
                     inimigo[id] = carregaInimigo(x, y);
                     id++;
                 }else if(c=='@'){
+                    mapa[y][x] = 0;
                     jogador->y = y;
                     jogador->x = x;
                 }
@@ -276,7 +277,6 @@ int le_mapa(FILE *arq, int mapa[][COLUNAS], boneco_t *jogador, boneco_t inimigo[
     return id;
 }
 
-void gotoxy(int x,int y){ printf("%c[%d;%df",0x1B,2+y,1+x); }
 
 int geraPosicao(int x, int posicao){
     int reposicao = x - posicao;
@@ -375,20 +375,20 @@ void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t i
 
 }
 
-void printa(int pos, int linha, char *string){
-    gotoxy(LARGURA/pos-strlen(string)/2,linha);
-    if(strlen(string)>0) printf("%s", string);
-}
-
 void FIM_DE_JOGO(int score){
-    printa(2, 12, "FIM DE JOGO");
+    char str[11 + 6];
 
-    printa(2, 18, "Pontuacao: ");
-    printf("%d", score);
+    limpaQuadro();
 
-    printa(2, 26, "CREDITOS");
-    printa(2, 28, "Matheus Costa        Terumi Tamai");
-    printa(2, 32, "");
+    sprintf(str, "Pontuacao: %d", score);
+
+    printa(2, 8, "FIM DE JOGO");
+
+    printa(2, 14, str);
+
+    printa(2, 20, "CREDITOS");
+    printa(2, 22, "Matheus Costa        Terumi Tamai");
+    printa(1, 29, "\n");
 }
 
 void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int foto, int *intervalo){
@@ -430,6 +430,8 @@ void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int
 }
 
 void partida(char nome_mapa[], boneco_t * jogador, int * pontuacao){
+    
+    int continua=1;
                     /** X,  Y, vidas, velocidade  */
     boneco_t inimigo[TOTAL_INIMIGO];
     tiro_t tiro[MAX_TIROS]={0};
@@ -449,9 +451,10 @@ void partida(char nome_mapa[], boneco_t * jogador, int * pontuacao){
 
     fclose(arquivo);
 
-    while(1){
 
-        printf("\033[H\033[J");
+    while(continua){
+
+        limpaQuadro();
 
         foto += jogador->velocidade;
 
@@ -466,7 +469,7 @@ void partida(char nome_mapa[], boneco_t * jogador, int * pontuacao){
 
         // finaliza partida:
         if(jogador->nvidas==0 || inimigos_existentes<=0){
-            break;
+            continua = 0;
         }
 
         geraQuadro(mapa, foto, jogador, inimigo, tiro, pontuacao, &inimigos_existentes, &animacao);
@@ -481,7 +484,7 @@ void partida(char nome_mapa[], boneco_t * jogador, int * pontuacao){
 int main(){
 
     int i=0;
-    char * lista_mapas[3] = {"mapa_exemplo.txt", "mapa_turmac.txt"};
+    char * lista_mapas[3] = {"mapas/mapa1.txt", "mapas/mapa_exemplo.txt", "mapas/mapa_turmac.txt"};
     int numero_mapa = 0;
     //inicializa a pontuação zerada
     int pontuacao=0;
@@ -489,6 +492,7 @@ int main(){
     boneco_t jogador = {0, 0, 20, VEL_MIN};
 
     //a partida perdura enquanto o jogador tiver vidas e ainda houver fases disponíveis
+    
     do{
         partida(lista_mapas[i], &jogador, &pontuacao);
         i++;
