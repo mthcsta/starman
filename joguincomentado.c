@@ -24,7 +24,7 @@
 #define DURACAO_TIRO 15
 
 #define INTERVALO_TIRO 10
-#define VEL_MIN -2
+#define VEL_MIN 1
 #define VEL_MAX 2
 
 #define LINHAS 35
@@ -41,10 +41,10 @@
 //estrutura do tiro
 typedef struct{
     int x, y,
-        prop, // 0: Inexistente, 1: Player, 2: Inimigo
+        prop, // 0: Inexistente, 1: Jogador, 2: Inimigo
         duracao;
 } tiro_t;
-
+//estrutura do boneco, que pode ser um jogador ou inimigo
 typedef struct{
     int x, y,
         nvidas,
@@ -61,9 +61,13 @@ void deletaInimigo(boneco_t inimigo[], int morto, int *inimigos_existentes){
 
 }
 
+//sorteia os movimentos do inimigo
 int MinMax(int min, int max){
     return (min + (rand() % (max-min+1)));
 }
+/**Verifica as posicoes relativas entre o jogador e o tiro do inimigo, e entre o inimigo e o tiro do jogador.
+   Computa os pontos ganhos a cada inimigo morto e as vidas perdidas por tiros do inimigo.
+**/
 
 void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[],int posicao, int * pontuacao, int *inimigos_existentes, int *animacao){
     int i, j, // iteradores
@@ -108,7 +112,8 @@ void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[],int posicao,
 
 
 
-//sorteia os movimentos do inimigo
+
+
 void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo, boneco_t *jogador){
     int minimo = 1, maximo = 6, andou_x=0;
     if(mapa[inimigo->y-1][inimigo->x] == PAREDE){
@@ -119,7 +124,7 @@ void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo, boneco_t *jogador){
         maximo = 6;
     }
 
-    switch(/*MinMax(minimo, maximo)*/ 0){
+    switch(MinMax(minimo, maximo)){
         case 1:
             inimigo->x += 1;
             andou_x=1;
@@ -478,12 +483,12 @@ int main(){
     int i=0;
     char * lista_mapas[3] = {"mapa_exemplo.txt", "mapa_turmac.txt"};
     int numero_mapa = 0;
-
+    //inicializa a pontuação zerada
     int pontuacao=0;
+    //inicializa o jogador no centro da tela com a velocidade mínima do jogo
+    boneco_t jogador = {0, 0, 20, VEL_MIN};
 
-    boneco_t jogador = {0, 0, 20, 0};
-
-
+    //a partida perdura enquanto o jogador tiver vidas e ainda houver fases disponíveis
     do{
         partida(lista_mapas[i], &jogador, &pontuacao);
         i++;
