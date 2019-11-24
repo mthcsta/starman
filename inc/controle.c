@@ -2,7 +2,7 @@ void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int
 
     int reposiciona;
 
-    c = tolower(c);
+    c = tolower(c); //evita que o controle nao funcione caso o capslock esteja ativado
 
     switch(c){
         case 's':

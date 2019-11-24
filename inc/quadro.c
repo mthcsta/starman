@@ -9,9 +9,7 @@ int atualizaQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_
     if(*salvar_estado_mensagem>0) *salvar_estado_mensagem -= 1;
     
     if(ehParede(mapa, jogador->x+posicao, jogador->y) || //se a pos x do jogador é igual a da parede de trás OU
-       ehParede(mapa, jogador->x+posicao+3, jogador->y) || //se a pos x do jogador é igual a da parede da frente OU
-       ehParede(mapa, jogador->x+posicao, jogador->y-1) || //se a pos y do jogador é igual ao chão OU
-       ehParede(mapa, jogador->x+posicao, jogador->y)){ //se a pos y do jogador é igual ao teto
+       ehParede(mapa, jogador->x+posicao+3, jogador->y)){ //se a pos x do jogador é igual a da parede da frente OU
         jogador->nvidas--; //o jogador perde uma vida
         *animacao = DURACAO_ANIMACAO; //a perda da vida é sinalizada por animação
         jogador->y = buscaParede(mapa, jogador->x+posicao+4, 0, 1, 0) + 2;

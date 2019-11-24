@@ -23,7 +23,7 @@
 // Jogador
 #define DURACAO_ANIMACAO 15
 #define INTERVALO_TIRO 10
-#define VEL_MIN 0
+#define VEL_MIN 1
 #define VEL_MAX 2
 
 // Inimigo

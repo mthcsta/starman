@@ -100,7 +100,7 @@ void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, F
         geraQuadro(mapa, posicao, jogador, inimigo, tiro, pontuacao, &inimigos_existentes, &animacao, &salvar_estado_mensagem, nivel);
 
         // 17000
-        usleep(40000);
+        usleep(50000);
     }
 
     return;
