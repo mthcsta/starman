@@ -2,7 +2,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdlib.h>
-
+#include <math.h>
 
 #ifndef LARGURA
 #define LARGURA 105

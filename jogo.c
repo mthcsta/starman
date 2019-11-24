@@ -12,7 +12,6 @@
 #define COLUNAS 415
 #define LARGURA 105
 
-#define MAPA_NOME_TAMANHO 60
 
 // Tiro
 #define MAX_TIROS 100
@@ -193,13 +192,14 @@ int buscaParede(int mapa[][COLUNAS], int x, int y, int muda, int limite){
 }
 
 /***atualiza a tela***/
-int atualizaTela(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *inimigos_existentes, int *animacao, int *intervalo){
+int atualizaTela(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *inimigos_existentes, int *animacao, int *intervalo, int *salvar_estado_mensagem){
     int i;
     int id;
     int x=0, y=0;
 
     if(*animacao>0) *animacao -= 1;
     if(*intervalo>0) *intervalo -= 1;
+    if(*salvar_estado_mensagem>0) *salvar_estado_mensagem -= 1;
 
     if(ehParede(mapa, jogador->x+posicao, jogador->y) || //se a pos x do jogador é igual a da parede de trás OU
        ehParede(mapa, jogador->x+posicao+3, jogador->y) || //se a pos x do jogador é igual a da parede da frente OU
@@ -299,7 +299,7 @@ int le_mapa(FILE *arq, int mapa[][COLUNAS], boneco_t *jogador, boneco_t inimigo[
 
 int geraPosicao(int x, int posicao){
     int reposicao = x - posicao;
-    if(posicao <= (COLUNAS - LARGURA) && reposicao>0 && x<LARGURA+posicao){
+    if(posicao <= (COLUNAS - LARGURA) && reposicao>0 && x<LARGURA+posicao-1){
         return reposicao;
     }else if(posicao>(COLUNAS - LARGURA)){
         reposicao = x - posicao;
@@ -311,19 +311,13 @@ int geraPosicao(int x, int posicao){
     return 0;
 }
 
-void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *pontuacao, int *inimigos_existentes, int *animacao){
+void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *pontuacao, int *inimigos_existentes, int *animacao, int *salvar_estado_mensagem){
     int i, id, linha=0, coluna=0, p, reposiciona_escrita=0, posicao_inimigo;
 
-    int mtx=0, mty=0;
-
-    for(i=0; i<MAX_TIROS; i++){
-        if(tiro[i].prop==1){
-            mtx = tiro[i].x;
-            mty = tiro[i].y;
-        }
-    }
-
-    printf("Vidas: %d Pontos: %d // %d / %d  || %d:%d\n", jogador->nvidas, *pontuacao, posicao, (posicao+jogador->x) % COLUNAS, mtx, mty);
+    printf("Vidas: %d Pontos: %d", jogador->nvidas, *pontuacao);
+    if(*salvar_estado_mensagem>0)  
+        printa(2, -1, "Estado Salvo");
+    printf("\n");
 
     /*** Gerando Jogador ***/
 
@@ -497,6 +491,7 @@ void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, F
     int animacao = 0;
     int intervalo = 0;
     int salvar_estado = 0;
+    int salvar_estado_mensagem = 0;
 
     FILE *arquivo;
 
@@ -525,11 +520,12 @@ void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, F
 
         if(salvar_estado==1){
             salvar_estado = 0;
+            salvar_estado_mensagem = 50;
             salvarEstado(nivel, posicao, *jogador, *pontuacao, tiro, inimigos_existentes, inimigo, animacao, intervalo);
         }
 
         buscaTiro(jogador, inimigo, tiro, posicao, pontuacao, &inimigos_existentes, &animacao);
-        atualizaTela(mapa, posicao, jogador, inimigo, tiro, &inimigos_existentes, &animacao, &intervalo);
+        atualizaTela(mapa, posicao, jogador, inimigo, tiro, &inimigos_existentes, &animacao, &intervalo, &salvar_estado_mensagem);
 
         // finaliza partida:
         if(jogador->nvidas==0 || inimigos_existentes<=0){
@@ -537,7 +533,7 @@ void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, F
         }
         printf("%d|",nivel);
 
-        geraQuadro(mapa, posicao, jogador, inimigo, tiro, pontuacao, &inimigos_existentes, &animacao);
+        geraQuadro(mapa, posicao, jogador, inimigo, tiro, pontuacao, &inimigos_existentes, &animacao, &salvar_estado_mensagem);
 
         // 17000
         usleep(40000);
@@ -595,7 +591,7 @@ int MENU_INICIAL(void){
 int main(){
 
     int i=0;
-    char lista_mapas[3][MAPA_NOME_TAMANHO] = {"mapas/mapa_exemplo.txt", "mapas/mapa_turmac.txt"};
+    char * lista_mapas[2] = {"mapas/mapa_exemplo.txt", "mapas/mapa_turmac.txt"};
     int numero_mapa = 0;
     //inicializa a pontuação zerada
     int pontuacao=0;
