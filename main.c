@@ -44,6 +44,7 @@ typedef struct{
         prop, // 0: Inexistente, 1: Jogador, 2: Inimigo
         duracao;
 } tiro_t;
+
 //estrutura do boneco, que pode ser um jogador ou inimigo
 typedef struct{
     int x, y,
@@ -54,29 +55,29 @@ typedef struct{
 
 /*-------------------------------*/
 /*--------Meus Includes----------*/
-#include "kbhit.h"
-#include "auxiliares.h"
-#include "estado.h"
-#include "controle.h"
-#include "inimigo.h"
-#include "jogador.h"
-#include "mapa.h"
-#include "parede.h"
-#include "quadro.h"
-#include "telas.h"
-#include "tiro.h"
+#include "headers/kbhit.h"
+#include "headers/auxiliares.h"
+#include "headers/estado.h"
+#include "headers/controle.h"
+#include "headers/inimigo.h"
+#include "headers/jogador.h"
+#include "headers/mapa.h"
+#include "headers/parede.h"
+#include "headers/quadro.h"
+#include "headers/telas.h"
+#include "headers/tiro.h"
 
-#include "kbhit.c"
-#include "auxiliares.c"
-#include "estado.c"
-#include "controle.c"
-#include "inimigo.c"
-#include "jogador.c"
-#include "mapa.c"
-#include "parede.c"
-#include "quadro.c"
-#include "telas.c"
-#include "tiro.c"
+#include "inc/kbhit.c"
+#include "inc/auxiliares.c"
+#include "inc/estado.c"
+#include "inc/controle.c"
+#include "inc/inimigo.c"
+#include "inc/jogador.c"
+#include "inc/mapa.c"
+#include "inc/parede.c"
+#include "inc/quadro.c"
+#include "inc/telas.c"
+#include "inc/tiro.c"
 
 int main(){
 
@@ -86,9 +87,9 @@ int main(){
     //inicializa a pontuação zerada
     int pontuacao=0;
     //inicializa o jogador no centro da tela com a velocidade mínima do jogo
-    boneco_t jogador = {0, 0, 20, VEL_MIN};
+    boneco_t jogador = {0, 0, 3, VEL_MIN};
 
-    //estado 
+    //estado
     int estado = 0;
     FILE *salve = NULL;
 
@@ -100,7 +101,7 @@ int main(){
             }
         }
 
-        //a partida perdura enquanto o jogador tiver vidas e ainda houver fases disponíveis        
+        //a partida perdura enquanto o jogador tiver vidas e ainda houver fases disponíveis
         while(jogador.nvidas>0 && i<2){
             partida(i, lista_mapas[i], &jogador, &pontuacao, salve);
             if(salve!=0){ // limpa a sujeira da variavel salve

@@ -1,4 +1,4 @@
-
+	
 int MENU_INICIAL(void){
     int continua = 1, i;
     int selecionado_indice = 0;
@@ -93,12 +93,11 @@ void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, F
         atualizaQuadro(mapa, posicao, jogador, inimigo, tiro, &inimigos_existentes, &animacao, &intervalo, &salvar_estado_mensagem);
 
         // finaliza partida:
-        if(jogador->nvidas==0 || inimigos_existentes<=0){
+        if(jogador->nvidas<=0 || inimigos_existentes<=0){
             continua = 0;
         }
-        printf("%d|",nivel);
 
-        geraQuadro(mapa, posicao, jogador, inimigo, tiro, pontuacao, &inimigos_existentes, &animacao, &salvar_estado_mensagem);
+        geraQuadro(mapa, posicao, jogador, inimigo, tiro, pontuacao, &inimigos_existentes, &animacao, &salvar_estado_mensagem, nivel);
 
         // 17000
         usleep(40000);

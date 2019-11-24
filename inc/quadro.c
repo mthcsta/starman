@@ -47,10 +47,10 @@ int atualizaQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_
     return x;
 }
 
-void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *pontuacao, int *inimigos_existentes, int *animacao, int *salvar_estado_mensagem){
+void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *pontuacao, int *inimigos_existentes, int *animacao, int *salvar_estado_mensagem, int nivel){
     int i, id, linha=0, coluna=0, p, reposiciona_escrita=0, posicao_inimigo;
 
-    printf("Vidas: %d Pontos: %d", jogador->nvidas, *pontuacao);
+    printf("|\u2605 Fase: %d | \u2665  Vidas: %d | \u263A  Pontos: %d |", nivel, jogador->nvidas, *pontuacao);
     if(*salvar_estado_mensagem>0)  
         printa(2, -1, "Estado Salvo");
     printf("\n");
@@ -59,9 +59,9 @@ void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t i
     if(*animacao%3==0){
 
         gotoxy(jogador->x, jogador->y-1);
-        printf("@");
+        printf("\u25E3");
         gotoxy(jogador->x, jogador->y);
-        printf("@@@@");
+        printf("\u2B15\u25A3\u25A4\u2AFA");
 
     }
     /*** Gerando Inimigos ***/
@@ -69,9 +69,9 @@ void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t i
         posicao_inimigo = geraPosicao(inimigo[i].x, posicao);
         if(posicao_inimigo>0){
             gotoxy(posicao_inimigo, inimigo[i].y-1);
-            printf("XX");
+            printf("\u29E9\u29E8");
             gotoxy(posicao_inimigo, inimigo[i].y);
-            printf("XX");
+            printf("\u25ED\u25EE");
         }
     }
     /*** Gerando Tiros ***/
