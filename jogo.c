@@ -12,6 +12,8 @@
 #define COLUNAS 415
 #define LARGURA 105
 
+#define MAPA_NOME_TAMANHO 60
+
 // Tiro
 #define MAX_TIROS 100
 #define VEL_BALA 5
@@ -20,7 +22,7 @@
 // Jogador
 #define DURACAO_ANIMACAO 15
 #define INTERVALO_TIRO 10
-#define VEL_MIN -3
+#define VEL_MIN 0
 #define VEL_MAX 2
 
 // Inimigo
@@ -55,12 +57,13 @@ typedef struct{
 
 
 void deletaInimigo(boneco_t inimigo[], int morto, int *inimigos_existentes){
-
     inimigo[morto] = inimigo[*inimigos_existentes-1]; //puxa o último inimigo vivo pra posicao do eliminado
     *inimigos_existentes -= 1; //elimina o inimigo da ultima pos (pq ele foi passado pra frente)
-
     return;
+}
 
+int ehParede(int mapa[][COLUNAS], int x,int y){
+    return mapa[y][x] == PAREDE;
 }
 
 /**Verifica as posicoes relativas entre o jogador e o tiro do inimigo, e entre o inimigo e o tiro do jogador.
@@ -108,14 +111,16 @@ void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[],int posicao,
 }
 
 
-
-
-int ehParede(int mapa[][COLUNAS], int x,int y){
-    return mapa[y][x] == PAREDE;
-}
-
 void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo, boneco_t *jogador){
     int minimo = 1, maximo = 5, andou_x=0;
+
+    if(MinMax(1, 10)==5){
+        if(inimigo->y > jogador->y){
+            minimo = maximo = 2;
+        }else{
+            minimo = maximo = 1;
+        }
+    }
 
     switch(MinMax(minimo, maximo)){
         case 1:
@@ -131,29 +136,27 @@ void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo, boneco_t *jogador){
             if(!ehParede(mapa, inimigo->x-1, inimigo->y+1) && !ehParede(mapa, inimigo->x-1, inimigo->y) && !ehParede(mapa, inimigo->x-1, inimigo->y-2)){
                 inimigo->x -= 1;
                 inimigo->y += 1;
+                andou_x=1;
             }
             break;        
         case 4:
             if(!ehParede(mapa, inimigo->x-1, inimigo->y-2) && !ehParede(mapa, inimigo->x-1, inimigo->y) && !ehParede(mapa, inimigo->x-1, inimigo->y-1)){
                 inimigo->x -= 1;
                 inimigo->y -= 1;
-                andou_x=2;
+                andou_x=1;
             }
             break;
         case 5:
             if(!ehParede(mapa, inimigo->x-1, inimigo->y)){
                 inimigo->x -= 1;
-                andou_x=2;
+                andou_x=1;
             }
             break;
         default: break;
     }
-    if(andou_x>0){
-        if(andou_x==1 && inimigo->x>=COLUNAS){
-            inimigo->x = 0;
-        }else if(inimigo->x<0){
-            inimigo->x = COLUNAS;
-        }
+    if(inimigo->y<=0 || inimigo->y>35) inimigo->y = LINHAS / 2 + 1;
+    if(andou_x==1 && inimigo->x<0){
+        inimigo->x = COLUNAS - 1;
     }
     return;
 }
@@ -173,9 +176,24 @@ void atira(tiro_t tiro[], int prop, int x, int y){
     return;
 }
 
+int buscaParede(int mapa[][COLUNAS], int x, int y, int muda, int limite){
+    if(ehParede(mapa, x, y)){
+        if(muda==1)
+            return y;
+        else
+            return x;
+    }else{
+        if(muda==1){
+            y++;
+        }else{
+            x++;
+        }
+        return buscaParede(mapa, x, y, muda, limite);
+    }
+}
 
 /***atualiza a tela***/
-int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *inimigos_existentes, int *animacao, int *intervalo){
+int atualizaTela(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *inimigos_existentes, int *animacao, int *intervalo){
     int i;
     int id;
     int x=0, y=0;
@@ -183,18 +201,19 @@ int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t i
     if(*animacao>0) *animacao -= 1;
     if(*intervalo>0) *intervalo -= 1;
 
-    if(mapa[jogador->y][jogador->x+coluna]==PAREDE || //se a pos x do jogador é igual a da parede de trás OU
-       mapa[jogador->y][jogador->x+2+coluna]==PAREDE || //se a pos x do jogador é igual a da parede da frente OU
-       mapa[jogador->y-1][jogador->x+coluna]==PAREDE|| //se a pos y do jogador é igual ao chão OU
-       mapa[jogador->y][jogador->x+coluna]==PAREDE){ //se a pos y do jogador é igual ao teto
+    if(ehParede(mapa, jogador->x+posicao, jogador->y) || //se a pos x do jogador é igual a da parede de trás OU
+       ehParede(mapa, jogador->x+posicao+3, jogador->y) || //se a pos x do jogador é igual a da parede da frente OU
+       ehParede(mapa, jogador->x+posicao, jogador->y-1) || //se a pos y do jogador é igual ao chão OU
+       ehParede(mapa, jogador->x+posicao, jogador->y)){ //se a pos y do jogador é igual ao teto
         jogador->nvidas--; //o jogador perde uma vida
         *animacao = DURACAO_ANIMACAO; //a perda da vida é sinalizada por animação
-        jogador->y=(LINHAS / 2) + 1; //a nave reinicia no centro da tela
+        jogador->y = buscaParede(mapa, jogador->x+posicao+4, 0, 1, 0) + 2;
+        jogador->velocidade = VEL_MIN;
     }
 
     for(i=0; i<*inimigos_existentes; i++){
 
-        if(jogador->x+coluna == inimigo[i].x && //verifica se o jogador e inimigo estão na mesma pos x
+        if(jogador->x+posicao == inimigo[i].x && //verifica se o jogador e inimigo estão na mesma pos x
             (fabs(jogador->y - inimigo[i].y) <= 1)){ //verifica o modulo da distancia vertical entre inimigo e jogador
             jogador->nvidas--; // se o jogador estiver dentro da parte visual do inimigo, jogador perde uma vida.
             *animacao = DURACAO_ANIMACAO; //perda da vida sinalizada por animação
@@ -210,10 +229,10 @@ int atualizaTela(int mapa[][COLUNAS], int coluna, boneco_t * jogador, boneco_t i
         if(tiro[i].prop!=0){
             if(tiro[i].prop==1){ // tiro do jogador
                 tiro[i].x += VEL_BALA;
-                if(tiro[i].x>COLUNAS) tiro[i].x = 0;
+                if(tiro[i].x>=COLUNAS) tiro[i].x = 0;
             }else{ // tiro do inimigo
                 tiro[i].x -= VEL_BALA;
-                if(tiro[i].x<0) tiro[i].x=COLUNAS;
+                if(tiro[i].x<0) tiro[i].x=COLUNAS-1;
             }
             // remove tiro após o fim da duração
             if(tiro[i].duracao==0){
@@ -349,7 +368,7 @@ void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t i
         while(coluna<LARGURA){
             if(p>=COLUNAS) p %=  COLUNAS; //zera periodicamente para repetir o início da tela
 
-            if(mapa[linha][p]==PAREDE){
+            if(ehParede(mapa, p, linha)){
                 if(reposiciona_escrita==1){ //
                     reposiciona_escrita=0;
                     gotoxy(coluna, linha);
@@ -384,14 +403,17 @@ void FIM_DE_JOGO(int score){
 
     printa(2, 8, "FIM DE JOGO");
 
-    printa(2, 14, str);
+    if(score>0){
+        printa(2, 14, str);
+    }
 
     printa(2, 20, "CREDITOS");
+    printa(2, 21, "/**-----------------------------------**/");
     printa(2, 22, "Matheus Costa        Terumi Tamai");
     printa(1, 29, "\n");
 }
 
-void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int foto, int *intervalo){
+void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int posicao, int *intervalo, int *salvar_estado){
 
     int reposiciona;
 
@@ -399,10 +421,12 @@ void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int
 
     switch(c){
         case 's':
-            jogador->y+=1;
+            if(!ehParede(mapa, jogador->x+posicao, jogador->y+1)){
+                jogador->y+=1;
+            }
             break;
         case 'w':
-            if(mapa[jogador->y-2][jogador->x+foto]!=PAREDE){
+            if(!ehParede(mapa, jogador->x+posicao, jogador->y-2)){
                 jogador->y-=1;
             }
             break;
@@ -418,9 +442,13 @@ void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int
             break;
         case ' ':
             if(*intervalo==0){
-                atira(tiro, 1, (jogador->x + foto) % COLUNAS, jogador->y);
+                atira(tiro, 1, (jogador->x + posicao) % COLUNAS, jogador->y);
                 *intervalo = INTERVALO_TIRO;
             }
+            break;
+
+        case 'g':
+            *salvar_estado = 1;
             break;
 
         default:
@@ -429,7 +457,34 @@ void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int
     return;
 }
 
-void partida(char nome_mapa[], boneco_t * jogador, int * pontuacao){
+void salvarEstado(int nivel, int posicao, boneco_t jogador, int pontuacao, tiro_t tiro[], int inimigos_existentes, boneco_t inimigo[], int animacao, int intervalo){
+    FILE *arquivo;
+    arquivo = fopen("_salve.bin", "w");
+    fwrite(&nivel, sizeof(int), 1, arquivo);
+    fwrite(&posicao, sizeof(int), 1, arquivo);
+    fwrite(&jogador, sizeof(boneco_t), 1, arquivo);
+    fwrite(&pontuacao, sizeof(int), 1, arquivo);
+    fwrite(tiro, sizeof(MAX_TIROS), 1, arquivo);
+    fwrite(&inimigos_existentes, sizeof(int), 1, arquivo);
+    fwrite(inimigo, sizeof(boneco_t), inimigos_existentes, arquivo);
+    fwrite(&animacao, sizeof(int), 1, arquivo);
+    fwrite(&intervalo, sizeof(int), 1, arquivo);
+    fclose(arquivo);
+}
+void carregarEstado(FILE * salve, int *posicao, boneco_t *jogador, int *pontuacao, tiro_t tiro[], int *inimigos_existentes, boneco_t inimigo[], int *animacao, int *intervalo){
+    fread(posicao, sizeof(int), 1, salve);
+    fread(jogador, sizeof(boneco_t), 1, salve);
+    fread(pontuacao, sizeof(int), 1, salve);
+    fread(tiro, sizeof(MAX_TIROS), 1, salve);
+    fread(inimigos_existentes, sizeof(int), 1, salve);
+    fread(inimigo, sizeof(boneco_t), *inimigos_existentes, salve);
+    fread(animacao, sizeof(int), 1, salve);
+    fread(intervalo, sizeof(int), 1, salve);
+    fclose(salve);
+    return;
+}
+
+void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, FILE * salve){
     
     int continua=1;
                     /** X,  Y, vidas, velocidade  */
@@ -438,9 +493,10 @@ void partida(char nome_mapa[], boneco_t * jogador, int * pontuacao){
     int mapa[LINHAS][COLUNAS];
     int i, j;
     int inimigos_existentes;
-    int foto = 0;
+    int posicao = 0;
     int animacao = 0;
     int intervalo = 0;
+    int salvar_estado = 0;
 
     FILE *arquivo;
 
@@ -451,28 +507,37 @@ void partida(char nome_mapa[], boneco_t * jogador, int * pontuacao){
 
     fclose(arquivo);
 
+    if(salve!=0){
+        carregarEstado(salve, &posicao, jogador, pontuacao, tiro, &inimigos_existentes, inimigo, &animacao, &intervalo);
+    }
 
     while(continua){
 
         limpaQuadro();
 
-        foto += jogador->velocidade;
+        posicao += jogador->velocidade;
 
-        if(foto<0) foto = COLUNAS;
-        else if(foto>=COLUNAS) foto=0;
+        if(posicao<0) posicao = COLUNAS;
+        else if(posicao>=COLUNAS) posicao=0;
 
         if(kbhit())
-            controle(getchar(), jogador, tiro, mapa, foto, &intervalo);
+            controle(getchar(), jogador, tiro, mapa, posicao, &intervalo, &salvar_estado);
 
-        buscaTiro(jogador, inimigo, tiro, foto, pontuacao, &inimigos_existentes, &animacao);
-        atualizaTela(mapa, foto, jogador, inimigo, tiro, &inimigos_existentes, &animacao, &intervalo);
+        if(salvar_estado==1){
+            salvar_estado = 0;
+            salvarEstado(nivel, posicao, *jogador, *pontuacao, tiro, inimigos_existentes, inimigo, animacao, intervalo);
+        }
+
+        buscaTiro(jogador, inimigo, tiro, posicao, pontuacao, &inimigos_existentes, &animacao);
+        atualizaTela(mapa, posicao, jogador, inimigo, tiro, &inimigos_existentes, &animacao, &intervalo);
 
         // finaliza partida:
         if(jogador->nvidas==0 || inimigos_existentes<=0){
             continua = 0;
         }
+        printf("%d|",nivel);
 
-        geraQuadro(mapa, foto, jogador, inimigo, tiro, pontuacao, &inimigos_existentes, &animacao);
+        geraQuadro(mapa, posicao, jogador, inimigo, tiro, pontuacao, &inimigos_existentes, &animacao);
 
         // 17000
         usleep(40000);
@@ -481,25 +546,82 @@ void partida(char nome_mapa[], boneco_t * jogador, int * pontuacao){
     return;
 }
 
+
+
+int MENU_INICIAL(void){
+    int continua = 1, i;
+    int selecionado_indice = 0;
+    char *menu[]={"Novo Jogo", "Carregar Jogo", "Sair"};
+    char selecionado_texto[20];
+
+    while(continua){
+        if(kbhit()){
+            switch(tolower(getchar())){
+                case 's':
+                    if(selecionado_indice<2)
+                        selecionado_indice++;
+                    else selecionado_indice=0;
+                    printf("\a");                    
+                    break;
+                case 'w':
+                    if(selecionado_indice>0)
+                        selecionado_indice--;
+                    else selecionado_indice=2;
+                    printf("\a");
+                    break;
+                case ' ':
+                case 10:
+                    printf("\a");
+                    return selecionado_indice;
+                    break;
+                default: break; 
+            }
+        }
+
+        limpaQuadro();
+        logo();
+
+        for(i=0; i<3; i++){
+
+            if(selecionado_indice==i){
+                sprintf(selecionado_texto, "\u00BB  %.13s", menu[i]);
+            }else 
+                sprintf(selecionado_texto, "  %.13s", menu[i]);
+            printa(2, 10+i, selecionado_texto);
+        }
+    }
+}
+
 int main(){
 
     int i=0;
-    char * lista_mapas[3] = {"mapas/mapa1.txt", "mapas/mapa_exemplo.txt", "mapas/mapa_turmac.txt"};
+    char lista_mapas[3][MAPA_NOME_TAMANHO] = {"mapas/mapa_exemplo.txt", "mapas/mapa_turmac.txt"};
     int numero_mapa = 0;
     //inicializa a pontuação zerada
     int pontuacao=0;
     //inicializa o jogador no centro da tela com a velocidade mínima do jogo
     boneco_t jogador = {0, 0, 20, VEL_MIN};
 
-    //a partida perdura enquanto o jogador tiver vidas e ainda houver fases disponíveis
-    
-    do{
-        partida(lista_mapas[i], &jogador, &pontuacao);
-        i++;
-    } while(jogador.nvidas>0 && i<2);
+    //estado 
+    int estado = 0;
+    FILE *salve = NULL;
 
-    FIM_DE_JOGO(pontuacao + (jogador.nvidas * 100));
+    if((estado=MENU_INICIAL())!=2){
+        if(estado==1){
+            salve = fopen("_salve.bin","r");
+            if(salve != 0){
+                fread(&i, sizeof(int), 1, salve);
+            }
+        }
 
+        //a partida perdura enquanto o jogador tiver vidas e ainda houver fases disponíveis        
+        do{
+            partida(i, lista_mapas[i], &jogador, &pontuacao, salve);
+            i++;
+        } while(jogador.nvidas>0 && i<2);
+
+        FIM_DE_JOGO(pontuacao + (jogador.nvidas * 100));
+    }else FIM_DE_JOGO(-5);
 
     return 0;
 }
