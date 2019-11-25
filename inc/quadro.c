@@ -78,7 +78,7 @@ void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t i
             posicao_inimigo = geraPosicao(tiro[i].x, posicao);
             if(posicao_inimigo>0){
                 gotoxy(posicao_inimigo, tiro[i].y);
-                if(tiro[i].prop==1) printf("--"); else printf(".");
+                if(tiro[i].prop==1) printf("\u22C6\u066D"); else printf("\u1A15");
             }
         }
     }

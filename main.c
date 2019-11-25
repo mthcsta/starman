@@ -22,14 +22,14 @@
 
 // Jogador
 #define DURACAO_ANIMACAO 15
-#define INTERVALO_TIRO 10
+#define INTERVALO_TIRO 6
 #define VEL_MIN 1
 #define VEL_MAX 2
 
 // Inimigo
 #define TOTAL_INIMIGO 20 //numero máximo de inimigos em cada nivel
 #define INIMIGO_MORTO -5
-#define CHANCE_DE_TIRO 50 // a chance de o inimigo dar um tiro, de 1 ao definido
+#define CHANCE_DE_TIRO 60 // a chance de o inimigo dar um tiro, de 1 ao definido
 
 
 

@@ -34,17 +34,21 @@ void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo, boneco_t *jogador){
             break;
 
         case 3:
-            if(!ehParede(mapa, inimigo->x-1, inimigo->y+1) && !ehParede(mapa, inimigo->x-1, inimigo->y) && !ehParede(mapa, inimigo->x-1, inimigo->y-2)){
-                inimigo->x -= 1;
-                inimigo->y += 1;
-                andou_x=1;
+            if(!ehParede(mapa, inimigo->x-1, inimigo->y+1) &&
+	    !ehParede(mapa, inimigo->x-1, inimigo->y) && 
+            !ehParede(mapa, inimigo->x-1, inimigo->y-2)){
+		inimigo->x -= 1;
+	        inimigo->y += 1;
+	        andou_x=1;
             }
             break;        
         case 4:
-            if(!ehParede(mapa, inimigo->x-1, inimigo->y-2) && !ehParede(mapa, inimigo->x-1, inimigo->y) && !ehParede(mapa, inimigo->x-1, inimigo->y-1)){
-                inimigo->x -= 1;
-                inimigo->y -= 1;
-                andou_x=1;
+            if(!ehParede(mapa, inimigo->x-1, inimigo->y-2) &&
+ 	    !ehParede(mapa, inimigo->x-1, inimigo->y) &&
+            !ehParede(mapa, inimigo->x-1, inimigo->y-1)){
+	        inimigo->x -= 1;
+	        inimigo->y -= 1;
+	        andou_x=1;
             }
             break;
         case 5:

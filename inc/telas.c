@@ -29,6 +29,13 @@ int MENU_INICIAL(void){
             }
         }
         limpaQuadro();
+	i=0;
+        
+        while(i<5){
+            gotoxy(MinMax(1, 105), MinMax(1, 35));
+            printf("\u2726");
+            i++;
+        }
         logo();
         for(i=0; i<3; i++){
 
@@ -111,15 +118,15 @@ void FIM_DE_JOGO(int score){
     char str[11 + 6];
 
     limpaQuadro();
-    sprintf(str, "Pontuacao: %d", score);
+    sprintf(str, "\u225B Pontuacao: %d \u225B", score);
     printa(2, 8, "FIM DE JOGO");
     
     // Condição para esconder a pontuação 
     // quando FIM_DE_JOGO for chamado para fechar o jogo.
     if(score>0) printa(2, 14, str);
 
-    printa(2, 20, "CREDITOS");
-    printa(2, 21, "/**-----------------------------------**/");
+    printa(2, 20, "CREDITOS  \u26FE");
+    printa(2, 21, "/.\u2734.\u2735.\u2736.\u2734.\u2734.\u2735.\u2736.\u2734.\u2735.\u2736.\u2735.\u2736.\u2734.\u2735.\u2736.\u2734.\u2734.\u2735.\u2736.\u2734.\u2735.\u2736.\u2735.\u2736./"); //tem que arrumar
     printa(2, 22, "Matheus Costa        Terumi Tamai");
     printa(1, 29, "\n");
 }

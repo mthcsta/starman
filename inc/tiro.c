@@ -27,14 +27,20 @@ void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[],int posicao,
                         j++;
                 }
             }
+
+
+
+	    /**************************************/
             /*** Matando o Jogador por tiros *****/
+	    /************************************/
+
             //Se as coordenadas x e y do tiro coincidem com as do jogador, o jogador perde uma vida
             else if(*animacao==0 && tiro[i].prop==2 && tiro[i].x>=jogador->x+posicao && tiro[i].x-VEL_BALA<=jogador->x+posicao &&
                     (tiro[i].y==jogador->y || tiro[i].y==jogador->y-1)){
-                *animacao = DURACAO_ANIMACAO;
-                jogador->nvidas--;
+                *animacao = DURACAO_ANIMACAO;//o jogador pisca na tela
+                jogador->nvidas--;//o jogador perde uma vida
                 tiro[i].prop=0; //o tiro deixa de existir
-                printf("\a");
+                printf("\a"); //emite sinal sonoro
             }
 
         }

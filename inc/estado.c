@@ -1,5 +1,7 @@
 #include <stdio.h>
-
+/*Escreve no arquivo destinado a esse fim o estado atual do jogo:
+	Nivel, posição do jogador, pontuação, inimigos restantes e suas posições,
+*/
 void salvarEstado(int nivel, int posicao, boneco_t jogador, int pontuacao, tiro_t tiro[], int inimigos_existentes, boneco_t inimigo[], int animacao, int intervalo){
     FILE *arquivo;
     arquivo = fopen(SALVE_ARQUIVO, "w");
