@@ -2,7 +2,7 @@
 /****** * * * MENU INICIAL * * * ********/
 /***************************************/
 
-int MENU_INICIAL(som david){
+int MENU_INICIAL(som mp3){
     int continua = 1, i;
     int selecionado_indice = 0;
     char *menu[]={"Novo Jogo", "Carregar Jogo", "Sair"};
@@ -50,8 +50,8 @@ int MENU_INICIAL(som david){
             printa(10+i, opcao_menu);//posiciona o menu
         }
 
-	if(mpg123_read(david.mh, david.buffer, david.buffer_size/4, &david.done) == MPG123_OK)
-	    ao_play(david.dev, david.buffer, david.done);
+	if(mpg123_read(mp3.mh, mp3.buffer, mp3.buffer_size/4, &mp3.done) == MPG123_OK)
+	    ao_play(mp3.dev, mp3.buffer, mp3.done);
 
         gotoxy(0, 30);
         usleep(4000);
@@ -64,7 +64,7 @@ int MENU_INICIAL(som david){
 /*****************************************/
 /****** * * * * * PARTIDA * * * * *******/
 /***************************************/
-void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, FILE * salve, som david){
+void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, FILE * salve, som mp3){
     int continua=1;//inicia o laço da parte
 
     boneco_t inimigo[TOTAL_INIMIGO];
@@ -122,8 +122,8 @@ void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, F
 
         geraQuadro(mapa, posicao, jogador, inimigo, tiro, pontuacao, &inimigos_existentes, &animacao, &salvar_estado_mensagem, nivel);
 
-	if(mpg123_read(david.mh, david.buffer, david.buffer_size/6, &david.done) == MPG123_OK)
-	    ao_play(david.dev, david.buffer, david.done);
+	if(mpg123_read(mp3.mh, mp3.buffer, mp3.buffer_size/6, &mp3.done) == MPG123_OK)
+	    ao_play(mp3.dev, mp3.buffer, mp3.done);
 
         // 17000
         usleep(2000);

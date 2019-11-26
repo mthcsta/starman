@@ -1,11 +1,8 @@
-
-
-
 #define BITS 8
 
 som musica()
 {
-	som david;
+	som mp3;
 
     mpg123_handle *mh;
     unsigned char *buffer;
@@ -40,30 +37,14 @@ som musica()
     format.matrix = "M";
     dev = ao_open_live(driver, &format, NULL);
 
-    /* decode and play */	
-/*
-    while (mpg123_read(mh, buffer, buffer_size, &done) == MPG123_OK)
-        ao_play(dev, buffer, done);
-*/
-	david.mh = mh;
-	david.buffer = buffer;
-	david.buffer_size = buffer_size;
-	david.done = done;
-	david.dev = dev;
+	/** Guarda os dados numa struct para ser usado fora desta função **/
+	mp3.mh = mh;
+	mp3.buffer = buffer;
+	mp3.buffer_size = buffer_size;
+	mp3.done = done;
+	mp3.dev = dev;
 	
 
-    return david;
-
-    /* clean up */
-    free(buffer);
-    ao_close(dev);
-    mpg123_close(mh);
-    mpg123_delete(mh);
-    mpg123_exit();
-    ao_shutdown();
-
+    return mp3;
 }
 
-void proximoFeixe(){
-	
-}

@@ -8,15 +8,21 @@ void atualizaQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, b
     if(*salvar_estado_mensagem>0) *salvar_estado_mensagem -= 1;
 
 
-    if(ehParede(mapa, jogador->x+posicao, jogador->y) || //se a pos x do jogador é igual a da parede de trás OU
-       ehParede(mapa, jogador->x+posicao+3, jogador->y)){ //se a pos x do jogador é igual a da parede da frente
+    if( ehParede(mapa, jogador->x+posicao+0, jogador->y) || //se a pos x do jogador é igual a da parede de trás OU
+        ehParede(mapa, jogador->x+posicao+1, jogador->y) || //se as partes internas
+	ehParede(mapa, jogador->x+posicao+2, jogador->y) || // da nave estão numa parede.
+	ehParede(mapa, jogador->x+posicao+3, jogador->y) ){ //se a pos x do jogador é igual a da parede da frente
+
         jogador->nvidas--; //o jogador perde uma vida
         *animacao = DURACAO_ANIMACAO; //a perda da vida é sinalizada por animação
         jogador->y = buscaParede(mapa, jogador->x+posicao+4, 0, 1, 0) + 2;
         jogador->velocidade = VEL_MIN;
     }
+
+
     for(i=0; i<*inimigos_existentes; i++){
-        if( *animacao==0 && (jogador->x+posicao == inimigo[i].x || jogador->x+posicao+3 == inimigo[i].x) && //verifica se o jogador e inimigo estão na mesma pos x
+        if( *animacao==0 && 
+	    jogador->x+posicao <= inimigo[i].x && jogador->x+posicao+3 >= inimigo[i].x && //verifica se o jogador e inimigo estão na mesma pos x
             (fabs(jogador->y - inimigo[i].y) <= 1)){ //verifica o modulo da distancia vertical entre inimigo e jogador
             jogador->nvidas--; // se o jogador estiver dentro da parte visual do inimigo, jogador perde uma vida.
             *animacao = DURACAO_ANIMACAO; //perda da vida sinalizada por animação

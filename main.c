@@ -16,10 +16,10 @@ int main(){
     FILE *salve = NULL;
 	//fim das variáveis
 
-	som david = musica();
+	som mp3 = musica();
 
     // chama o MENU e recebe uma opção selecionada pelo usuario
-    selecionado=MENU_INICIAL(david);
+    selecionado=MENU_INICIAL(mp3);
 
 
     if(selecionado != SAIR){//se a op. do menu selecionada nao for a de sair
@@ -32,7 +32,7 @@ int main(){
             
             sprintf(local_mapa, MAPA_CAMINHO, nivel);
 
-            partida(nivel, local_mapa, &jogador, &pontuacao, salve, david);
+            partida(nivel, local_mapa, &jogador, &pontuacao, salve, mp3);
             if(salve!=0){ // limpa a sujeira da variavel salve
                 salve = 0;
             }

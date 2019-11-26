@@ -23,8 +23,8 @@
 // Jogador
 #define DURACAO_ANIMACAO 15
 #define INTERVALO_TIRO 6
-#define VEL_MIN 0
-#define VEL_MAX 2
+#define VEL_MIN 1
+#define VEL_MAX 3
 
 // Inimigo
 #define TOTAL_INIMIGO 20 //numero máximo de inimigos em cada nivel
@@ -49,15 +49,6 @@ typedef struct{
         velocidade;
 } boneco_t;
 
-#include <ao/ao.h>
-#include <mpg123.h>
-typedef struct {
-    mpg123_handle *mh;
-    unsigned char *buffer;
-    size_t buffer_size;
-    size_t done;
-	ao_device *dev;
-} som;
 
 /*-------------------------------*/
 /*------------Includes-----------*/
@@ -68,8 +59,14 @@ typedef struct {
 #include <ctype.h>
 #include <math.h>
 
+
+/*------Includes para libao------*/
+#include <ao/ao.h>
+#include <mpg123.h>
+
 /*-------------------------------*/
 /*--------Meus Includes----------*/
+#include "headers/musica.h"
 #include "headers/kbhit.h"
 #include "headers/auxiliares.h"
 #include "headers/estado.h"
@@ -81,8 +78,9 @@ typedef struct {
 #include "headers/quadro.h"
 #include "headers/telas.h"
 #include "headers/tiro.h"
-#include "headers/musica.h"
 
+
+#include "inc/musica.c"
 #include "inc/kbhit.c"
 #include "inc/auxiliares.c"
 #include "inc/estado.c"
@@ -94,4 +92,4 @@ typedef struct {
 #include "inc/quadro.c"
 #include "inc/telas.c"
 #include "inc/tiro.c"
-#include "inc/musica.c"
+
