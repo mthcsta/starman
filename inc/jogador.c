@@ -1,11 +1,11 @@
 int geraPosicao(int x, int posicao){
     int reposicao = x - posicao;
-    if(posicao <= (COLUNAS - LARGURA) && reposicao>0 && x<LARGURA+posicao-1){
+    if(posicao <= (COLUNAS_MAPA - COLUNAS_TELA) && reposicao>0 && x<COLUNAS_TELA+posicao-1){
         return reposicao;
-    }else if(posicao>(COLUNAS - LARGURA)){
+    }else if(posicao>(COLUNAS_MAPA - COLUNAS_TELA)){
         reposicao = x - posicao;
-        if(x<(COLUNAS - LARGURA)) reposicao += COLUNAS;
-        if(reposicao>0 && reposicao<(LARGURA-1)){
+        if(x<(COLUNAS_MAPA - COLUNAS_TELA)) reposicao += COLUNAS_MAPA;
+        if(reposicao>0 && reposicao<(COLUNAS_TELA-1)){
             return reposicao;
         }
     }

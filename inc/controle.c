@@ -1,5 +1,5 @@
 /***Movimenta a nave e atira de acordo com a entrada do teclado***/
-void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int posicao, int *intervalo, int *salvar_estado){
+void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS_MAPA], int posicao, int *intervalo, int *salvar_estado){
 
     int reposiciona;
 
@@ -31,15 +31,15 @@ void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS], int
             if(*intervalo==0){ //(cooldown) se o tiro nao foi dado recentemente
 		//gera o tiro a partir da posição do jogador, dentro dos limites da tela
 		//ex.:tela na pos 400, jogador na pos 19: pos do jogador=419
-		//sendo o limite da tela 414, %COLUNAS garante que o tiro iniciará na pos verdadeira
+		//sendo o limite da tela 414, %COLUNAS_MAPA garante que o tiro iniciará na pos verdadeira
 		//do jogador(x=4)
-                geraTiro(tiro, 1, (jogador->x + posicao) % COLUNAS, jogador->y);
+                geraTiro(tiro, 1, (jogador->x + posicao) % COLUNAS_MAPA, jogador->y);
                 *intervalo = INTERVALO_TIRO;//e atribui um valor de espera para novo tiro
             }
             break;
 
         case 'g'://se a entrada eh um g
-            *salvar_estado = 1; //o estado do jogo é salvo(como?)
+            *salvar_estado = 1; //o estado do jogo é salvo
             break;
 
         default:

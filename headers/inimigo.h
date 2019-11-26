@@ -3,7 +3,7 @@
 
 boneco_t carregaInimigo(int x, int y);
 
-void atualizaInimigo(int mapa[][COLUNAS], boneco_t *inimigo, boneco_t *jogador);
+void atualizaInimigo(int mapa[][COLUNAS_MAPA], boneco_t *inimigo, boneco_t *jogador);
 
 void deletaInimigo(boneco_t inimigo[], int morto, int *inimigos_existentes);
 

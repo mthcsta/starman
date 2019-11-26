@@ -1,5 +1,5 @@
 /***atualiza a Quadro***/
-int atualizaQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *inimigos_existentes, int *animacao, int *intervalo, int *salvar_estado_mensagem){
+int atualizaQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *inimigos_existentes, int *animacao, int *intervalo, int *salvar_estado_mensagem){
     int i;
     int id;
     int x=0, y=0;
@@ -7,9 +7,9 @@ int atualizaQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_
     if(*animacao>0) *animacao -= 1;
     if(*intervalo>0) *intervalo -= 1;
     if(*salvar_estado_mensagem>0) *salvar_estado_mensagem -= 1;
-    
+
     if(ehParede(mapa, jogador->x+posicao, jogador->y) || //se a pos x do jogador é igual a da parede de trás OU
-       ehParede(mapa, jogador->x+posicao+3, jogador->y)){ //se a pos x do jogador é igual a da parede da frente OU
+       ehParede(mapa, jogador->x+posicao+3, jogador->y)){ //se a pos x do jogador é igual a da parede da frente
         jogador->nvidas--; //o jogador perde uma vida
         *animacao = DURACAO_ANIMACAO; //a perda da vida é sinalizada por animação
         jogador->y = buscaParede(mapa, jogador->x+posicao+4, 0, 1, 0) + 2;
@@ -31,10 +31,10 @@ int atualizaQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_
         if(tiro[i].prop!=0){
             if(tiro[i].prop==1){ // tiro do jogador
                 tiro[i].x += VEL_BALA;
-                if(tiro[i].x>=COLUNAS) tiro[i].x = 0;
+                if(tiro[i].x>=COLUNAS_MAPA) tiro[i].x = 0;
             }else{ // tiro do inimigo
                 tiro[i].x -= VEL_BALA;
-                if(tiro[i].x<0) tiro[i].x=COLUNAS-1;
+                if(tiro[i].x<0) tiro[i].x=COLUNAS_MAPA-1;
             }
             // remove tiro após o fim da duração
             if(tiro[i].duracao==0){
@@ -45,12 +45,13 @@ int atualizaQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_
     return x;
 }
 
-void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *pontuacao, int *inimigos_existentes, int *animacao, int *salvar_estado_mensagem, int nivel){
-    int i, id, linha=0, coluna=0, p, reposiciona_escrita=0, posicao_inimigo;
+void geraQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *pontuacao, int *inimigos_existentes, int *animacao, int *salvar_estado_mensagem, int nivel){
+    int i, id, linha=0, coluna_tela=0, coluna_mapa=0, reposiciona_escrita=0, posicao_inimigo;
 
+    //Print na primeira linha na tela dos dados do jogo (Fase, Vidas e Pontos)
     printf("|\u2605 Fase: %d | \u2665  Vidas: %d | \u263A  Pontos: %d |", nivel, jogador->nvidas, *pontuacao);
-    if(*salvar_estado_mensagem>0)  
-        printa(2, -1, "Estado Salvo");
+    if(*salvar_estado_mensagem>0)      //quando o estado do jogo eh salvo
+        printa(-1, "Estado Salvo"); //uma mensagem aparece na tela para confirmar
     printf("\n");
 
     /*** Gerando Jogador ***/
@@ -83,34 +84,34 @@ void geraQuadro(int mapa[][COLUNAS], int posicao, boneco_t * jogador, boneco_t i
         }
     }
     /*** Gerando Paredes ***/
-    while(linha<LINHAS){
-        coluna=0;
-        reposiciona_escrita=0; // quando zerado, reposiciona equivale a falso
-        p = posicao; //coluna auxiliar
-        gotoxy(coluna, linha);
-        while(coluna<LARGURA){
-            if(p>=COLUNAS) p %=  COLUNAS; //zera periodicamente para repetir o início da tela
+	linha = 0;//contador de linhas_LINHAS_MAPA
+    while(linha<LINHAS_MAPA){ //enquanto nao chegar na ultima linha do mapa
+        coluna_tela = 0;//coluna da tela atual (36x105) eh zero
+        reposiciona_escrita=0; //n ha reposicionamento da escrita
+        coluna_mapa = posicao; //coluna do vetor do mapa (35x415) recebe o valor da posição da tela
+        gotoxy(coluna_tela, linha);//vai pra essa posição e imprime
+        while(coluna_tela<COLUNAS_TELA){//percorre a coluna
+            if(coluna_mapa>=COLUNAS_MAPA) 
+		coluna_mapa %= COLUNAS_MAPA; //zera periodicamente para repetir o início da tela
 
-            if(ehParede(mapa, p, linha)){
-                if(reposiciona_escrita==1){ //
+            if(ehParede(mapa, coluna_mapa, linha)){//se encontrar um caracter
+                if(reposiciona_escrita==1){ //aciona reposicionamento para escrita
                     reposiciona_escrita=0;
-                    gotoxy(coluna, linha);
+                    gotoxy(coluna_tela, linha);
                 }
 
                 printf("\u2588");
-                coluna++;
-                p++;
-            }else if(mapa[linha][p]>0){
-                coluna+=mapa[linha][p];
-                p+=mapa[linha][p];
-                gotoxy(coluna, linha);
+                coluna_tela++;
+                coluna_mapa++;
             }else{
-                coluna++;
-                p++;
+                coluna_tela++;
+                coluna_mapa++;
                 reposiciona_escrita=1;
             }
         }
         printf("\n");
         linha++;
     }
+    
+    
 }

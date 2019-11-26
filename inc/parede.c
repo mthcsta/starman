@@ -1,8 +1,8 @@
-int ehParede(int mapa[][COLUNAS], int x,int y){
+int ehParede(int mapa[][COLUNAS_MAPA], int x, int y){
     return mapa[y][x] == PAREDE;
 }
 
-int buscaParede(int mapa[][COLUNAS], int x, int y, int muda, int limite){
+int buscaParede(int mapa[][COLUNAS_MAPA], int x, int y, int muda, int limite){
     if(ehParede(mapa, x, y)){
         if(muda==1)
             return y;
