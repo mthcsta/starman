@@ -38,7 +38,13 @@ int main(){
             nivel++;
         }
 
-        FIM_DE_JOGO(pontuacao + (jogador.nvidas * 100));
+		pontuacao += (jogador.nvidas * 100);
+		
+		if(classifica(pontuacao) == 0){
+	        FIM_DE_JOGO(pontuacao);		
+		}else{
+	        FIM_DE_JOGO(1);
+		}
     }else FIM_DE_JOGO(-5);
 
     return 0;

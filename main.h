@@ -10,12 +10,17 @@
 #define LINHAS_MAPA 35
 #define COLUNAS_MAPA 415
 #define COLUNAS_TELA 105
-#define SALVE_ARQUIVO "dados/_salve.bin"
+#define SALVE_ARQUIVO "dados/salve.bin"
 #define NIVEL_INEXISTENTE -5
 #define NOME_MAPA_TAMANHO 50
 #define MAPA_CAMINHO "mapas/nivel%d.txt"
 #define MUSICA_TEMA 1
 #define BUFFER_TAMANHO 6 // tamanho do buffer de som que sera pego para reproduzir do arquivo mp3
+
+#define CLASSIFICADOS_ARQUIVO "dados/classificados.bin"
+#define LIMITE_CLASSIFICADOS 3
+#define NOME_TAMANHO_MAXIMO 12
+
 
 // Tiro
 #define MAX_TIROS 15
@@ -66,6 +71,8 @@ typedef struct{
 /*--------Meus Includes----------*/
 // Headers
 #include "headers/musica.h"
+#include "headers/classificacao.h"
+
 #include "headers/kbhit.h"
 
 #include "headers/auxiliares.h"
@@ -80,9 +87,12 @@ typedef struct{
 #include "headers/tiro.h"
 
 
+
 // Includes, arquivos com dependencia da main.c
 #include "inc/musica.c"
 #include "inc/kbhit.c"
+
+#include "inc/classificacao.c"
 
 #include "inc/auxiliares.c"
 #include "inc/estado.c"
@@ -94,5 +104,4 @@ typedef struct{
 #include "inc/quadro.c"
 #include "inc/telas.c"
 #include "inc/tiro.c"
-
 

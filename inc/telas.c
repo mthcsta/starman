@@ -173,7 +173,9 @@ void FIM_DE_JOGO(int score){
 
     // Condição para esconder a pontuação
     // quando FIM_DE_JOGO for chamado para fechar o jogo.
-    if(score>0) printa(12, str);
+	if(score==1){
+		listaClassificados(12);
+    }else if(score>0) printa(12, str);
     //imprime créditos e estrelinhas
     printa(16, "CREDITOS  \u26FE");
     gotoxy(27,17);
