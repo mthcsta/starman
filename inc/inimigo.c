@@ -23,8 +23,9 @@ void atualizaInimigo(int mapa[][COLUNAS_MAPA], boneco_t *inimigo, boneco_t *joga
             minimo = maximo = 1;//direciona para o case 1(o inimigo se move pra baixo)
         }
     }
+
     /**Gera os movimentos dos inimigos***/
-    switch(MinMax(minimo, maximo)){//faz um sorteio com srand
+    switch(/*MinMax(minimo, maximo)*/ 0){//faz um sorteio com srand
         case 1://se a prox pos. do inimigo pra baixo nao eh parede
             if(!ehParede(mapa, inimigo->x, inimigo->y+1))
                 inimigo->y += 1;//o inimigo se move uma pos. pra baixo

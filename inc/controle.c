@@ -1,8 +1,6 @@
 /***Movimenta a nave e atira de acordo com a entrada do teclado***/
 void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS_MAPA], int posicao, int *intervalo, int *salvar_estado){
 
-    int reposiciona;
-
     c = tolower(c); //evita que o controle nao funcione caso o capslock esteja ativado
 	
   

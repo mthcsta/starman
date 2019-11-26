@@ -3,8 +3,7 @@
  * Computa os pontos ganhos a cada inimigo morto e as vidas perdidas por tiros do inimigo.
 **/
 void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[],int posicao, int * pontuacao, int *inimigos_existentes, int *animacao){
-    int i, j, // iteradores
-        id; //variável auxiliar para guardar o id do inimigo
+    int i, j; // iteradores
 
     for(i=0; i<MAX_TIROS; i++){
         if(tiro[i].prop>0){ //se o tiro existe, verifica sua posição em relação ao boneco

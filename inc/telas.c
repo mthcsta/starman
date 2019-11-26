@@ -2,7 +2,7 @@
 /****** * * * MENU INICIAL * * * ********/
 /***************************************/
 
-int MENU_INICIAL(void){
+int MENU_INICIAL(som david){
     int continua = 1, i;
     int selecionado_indice = 0;
     char *menu[]={"Novo Jogo", "Carregar Jogo", "Sair"};
@@ -49,22 +49,27 @@ int MENU_INICIAL(void){
              }
             printa(10+i, opcao_menu);//posiciona o menu
         }
+
+	if(mpg123_read(david.mh, david.buffer, david.buffer_size/4, &david.done) == MPG123_OK)
+	    ao_play(david.dev, david.buffer, david.done);
+
         gotoxy(0, 30);
         usleep(4000);
     }
+
+	return 0;
 }
 
 
 /*****************************************/
 /****** * * * * * PARTIDA * * * * *******/
 /***************************************/
-void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, FILE * salve){
+void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, FILE * salve, som david){
     int continua=1;//inicia o laço da parte
 
     boneco_t inimigo[TOTAL_INIMIGO];
     tiro_t tiro[MAX_TIROS]={0};
     int mapa[LINHAS_MAPA][COLUNAS_MAPA];
-    int i, j;
     int inimigos_existentes;
     int posicao = 0;
     int animacao = 0;
@@ -117,8 +122,11 @@ void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, F
 
         geraQuadro(mapa, posicao, jogador, inimigo, tiro, pontuacao, &inimigos_existentes, &animacao, &salvar_estado_mensagem, nivel);
 
+	if(mpg123_read(david.mh, david.buffer, david.buffer_size/6, &david.done) == MPG123_OK)
+	    ao_play(david.dev, david.buffer, david.done);
+
         // 17000
-        usleep(50000);
+        usleep(2000);
     }
 
     return;
@@ -129,7 +137,7 @@ void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, F
 /***************************************/
 
 void FIM_DE_JOGO(int score){
-    char str[11 + 6];
+    char str[40];
 
     limpaQuadro();
     sprintf(str, "\u225B Pontuacao: %d \u225B", score);//imprime a pontuação final

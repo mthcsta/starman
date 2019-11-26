@@ -1,12 +1,12 @@
 /***atualiza a Quadro***/
-int atualizaQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *inimigos_existentes, int *animacao, int *intervalo, int *salvar_estado_mensagem){
-    int i;
-    int id;
-    int x=0, y=0;
-
+void atualizaQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *inimigos_existentes, int *animacao, int *intervalo, int *salvar_estado_mensagem){
+    int i; // iterador
+	
+	// Contagens regressivas:
     if(*animacao>0) *animacao -= 1;
     if(*intervalo>0) *intervalo -= 1;
     if(*salvar_estado_mensagem>0) *salvar_estado_mensagem -= 1;
+
 
     if(ehParede(mapa, jogador->x+posicao, jogador->y) || //se a pos x do jogador é igual a da parede de trás OU
        ehParede(mapa, jogador->x+posicao+3, jogador->y)){ //se a pos x do jogador é igual a da parede da frente
@@ -16,7 +16,7 @@ int atualizaQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, bo
         jogador->velocidade = VEL_MIN;
     }
     for(i=0; i<*inimigos_existentes; i++){
-        if(jogador->x+posicao == inimigo[i].x && //verifica se o jogador e inimigo estão na mesma pos x
+        if( *animacao==0 && (jogador->x+posicao == inimigo[i].x || jogador->x+posicao+3 == inimigo[i].x) && //verifica se o jogador e inimigo estão na mesma pos x
             (fabs(jogador->y - inimigo[i].y) <= 1)){ //verifica o modulo da distancia vertical entre inimigo e jogador
             jogador->nvidas--; // se o jogador estiver dentro da parte visual do inimigo, jogador perde uma vida.
             *animacao = DURACAO_ANIMACAO; //perda da vida sinalizada por animação
@@ -42,11 +42,11 @@ int atualizaQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, bo
             }else tiro[i].duracao--;
         }
     }
-    return x;
+    return;
 }
 
 void geraQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *pontuacao, int *inimigos_existentes, int *animacao, int *salvar_estado_mensagem, int nivel){
-    int i, id, linha=0, coluna_tela=0, coluna_mapa=0, reposiciona_escrita=0, posicao_inimigo;
+    int i, linha=0, coluna_tela=0, coluna_mapa=0, reposiciona_escrita=0, posicao_inimigo;
 
     //Print na primeira linha na tela dos dados do jogo (Fase, Vidas e Pontos)
     printf("|\u2605 Fase: %d | \u2665  Vidas: %d | \u263A  Pontos: %d |", nivel, jogador->nvidas, *pontuacao);
