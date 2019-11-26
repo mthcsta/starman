@@ -1,5 +1,7 @@
+
+/*---------------Controle para a função Partida()-------------------*/
 /***Movimenta a nave e atira de acordo com a entrada do teclado***/
-void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS_MAPA], int posicao, int *intervalo, int *salvar_estado){
+void controlePartida(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS_MAPA], int posicao, int *intervalo, int *salvar_estado){
 
     c = tolower(c); //evita que o controle nao funcione caso o capslock esteja ativado
 	
@@ -44,4 +46,32 @@ void controle(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS_MAPA]
          break;
     }
     return;
+}
+
+/*---------------Controle para a função MENU_INICIAL()-------------------*/
+/***Movimento a seta no menu de acordo com a entrada do teclado***/
+int controleMenu(int c, int *selecionado_indice){
+	c = tolower(c);
+    switch(c){//o char eh convertido em minúsculo pra evitar erro de Capslock
+      	case 's': //se a entrada for um S (pra baixo)
+          	if(*selecionado_indice<2) //verifica se está no ultimo item
+              	*selecionado_indice+=1;//senão, leva o cursor pro prox item
+            else *selecionado_indice=0;//se sim, leva o cursor pro primeiro item
+            printf("\a");//emite sinal sonoro
+                break;
+        case 'w'://se a entrada for um W (pra cima)
+            if(*selecionado_indice>0)//verifica se esta no primeiro item
+                *selecionado_indice-=1;//senão, leva o cursor pro item de cima
+            else *selecionado_indice=2;//se sim, leva o cursor para baixo
+            printf("\a");//emite sinal sonoro
+            break;
+        case ' '://se a entrada for o espaço
+        case 10://ou enter
+            printf("\a");
+            return *selecionado_indice;//termina a função
+            break;
+        default: break;
+    }
+	// retorno de um numero de indice impossivel de ser valido
+	return -1;
 }
