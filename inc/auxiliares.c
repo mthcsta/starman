@@ -28,7 +28,7 @@ void limpaQuadro(void){
 //arte ascii supimpa para o logo do menu inicial
 void logo(void){
   printa(3, ".dP\"Y8 888888    db    88\"\"Yb 8b    d8    db    88b 88 ");
-  printa(4, "\\`Ybo.\"   88     dPYb   88__dP 88b  d88   dPYb   88Yb88 ");
-  printa(5, "o.\\`Y8b   88    dP__Yb  88\"Yb  88YbdP88  dP__Yb  88 Y88 ");
+  printa(4, " `Ybo.\"   88     dPYb   88__dP 88b  d88   dPYb   88Yb88 ");
+  printa(5, "o. `Y8b   88    dP__Yb  88\"Yb  88YbdP88  dP__Yb  88 Y88 ");
   printa(6, "8bodP'   88   dP\"\"\"\"Yb 88  Yb 88 YY 88 dP\"\"\"\"Yb 88  Y8 ");
 }

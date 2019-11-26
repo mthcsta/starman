@@ -145,10 +145,14 @@ void FIM_DE_JOGO(int score){
 
     // Condição para esconder a pontuação
     // quando FIM_DE_JOGO for chamado para fechar o jogo.
-    if(score>0) printa(14, str);
+    if(score>0) printa(12, str);
     //imprime créditos e estrelinhas
-    printa(20, "CREDITOS  \u26FE");
-    printa(21, "/.\u2734.\u2735.\u2736.\u2734.\u2734.\u2735.\u2736.\u2734.\u2735.\u2736.\u2735.\u2736.\u2734.\u2735.\u2736.\u2734.\u2734.\u2735.\u2736.\u2734.\u2735.\u2736.\u2735.\u2736./"); //tem que arrumar
-    printa(22, "Matheus Costa        Terumi Tamai");
+    printa(16, "CREDITOS  \u26FE");
+    gotoxy(27,17);
+    printf("/.\u2734.\u2735.\u2736.\u2734.\u2734.\u2735.\u2736.\u2734.\u2735.\u2736.\u2735.\u2736.\u2734.\u2735.\u2736.\u2734.\u2734.\u2735.\u2736.\u2734.\u2735.\u2736.\u2735.\u2736./"); //tem que arrumar
+	printa(19, "Programação && Design");
+    printa(20, "Matheus Costa        Terumi Tamai");
+	printa(22, "Musica");
+	printa(23, "David Bowie - Starman (8bits)");
     printa(29, "\n");
 }
