@@ -1,6 +1,5 @@
 /*-------------------------------*/
 /*--------Meus Defines----------*/
-
 //Menu
 #define NOVO_JOGO 0
 #define CONTINUAR_JOGO 1
@@ -11,12 +10,15 @@
 #define LINHAS_MAPA 35
 #define COLUNAS_MAPA 415
 #define COLUNAS_TELA 105
-#define SALVE_ARQUIVO "_salve.bin"
+#define SALVE_ARQUIVO "dados/_salve.bin"
 #define NIVEL_INEXISTENTE -5
+#define NOME_MAPA_TAMANHO 50
 #define MAPA_CAMINHO "mapas/nivel%d.txt"
+#define MUSICA_TEMA 1
+#define BUFFER_TAMANHO 6 // tamanho do buffer de som que sera pego para reproduzir do arquivo mp3
 
 // Tiro
-#define MAX_TIROS 100
+#define MAX_TIROS 15
 #define VEL_BALA 5
 #define DURACAO_TIRO 20
 
@@ -25,6 +27,7 @@
 #define INTERVALO_TIRO 6
 #define VEL_MIN 1
 #define VEL_MAX 3
+#define JOGADOR_NVIDAS 8
 
 // Inimigo
 #define TOTAL_INIMIGO 20 //numero máximo de inimigos em cada nivel
@@ -32,9 +35,9 @@
 #define CHANCE_DE_TIRO 60 // a chance de o inimigo dar um tiro, de 1 ao definido
 
 
+
 /*-------------------------------*/
 /*------------Estruturas---------*/
-
 //estrutura do tiro
 typedef struct{
     int x, y,
@@ -50,6 +53,7 @@ typedef struct{
 } boneco_t;
 
 
+
 /*-------------------------------*/
 /*------------Includes-----------*/
 #include <stdio.h>
@@ -59,15 +63,11 @@ typedef struct{
 #include <ctype.h>
 #include <math.h>
 
-
-/*------Includes para libao------*/
-#include <ao/ao.h>
-#include <mpg123.h>
-
-/*-------------------------------*/
 /*--------Meus Includes----------*/
+// Headers
 #include "headers/musica.h"
 #include "headers/kbhit.h"
+
 #include "headers/auxiliares.h"
 #include "headers/estado.h"
 #include "headers/controle.h"
@@ -80,8 +80,10 @@ typedef struct{
 #include "headers/tiro.h"
 
 
+// Includes, arquivos com dependencia da main.c
 #include "inc/musica.c"
 #include "inc/kbhit.c"
+
 #include "inc/auxiliares.c"
 #include "inc/estado.c"
 #include "inc/controle.c"
@@ -92,4 +94,5 @@ typedef struct{
 #include "inc/quadro.c"
 #include "inc/telas.c"
 #include "inc/tiro.c"
+
 

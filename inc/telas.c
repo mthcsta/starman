@@ -32,15 +32,18 @@ int MENU_INICIAL(som mp3){
             }
         }
         limpaQuadro();//limpa a tela para escrever um novo quadro
-	i=0;
-
-        while(i<5){
+		
+		// codigo para as estrelinhas:
+		for(i=0; i<5; i++){
             gotoxy(MinMax(1, 105), MinMax(1, 35));
             printf("\u2726");//gera estrelinhas na tela
-            i++;
-        }
+		}
+
+		// codigo para a logo do game:
         logo();//escreve o logo
 
+
+		// codigo para a lista de opções do menu:
         for(i=0; i<3; i++){
             if(selecionado_indice==i){//verifica onde esta a opção do cursor
                 sprintf(opcao_menu, "\u00BB  %.13s", menu[i]);//pra printar a setinha ao lado da opção
@@ -50,11 +53,19 @@ int MENU_INICIAL(som mp3){
             printa(10+i, opcao_menu);//posiciona o menu
         }
 
-	if(mpg123_read(mp3.mh, mp3.buffer, mp3.buffer_size/4, &mp3.done) == MPG123_OK)
-	    ao_play(mp3.dev, mp3.buffer, mp3.done);
+        gotoxy(0, 30); // posiciona o cursor para longe do menu
 
-        gotoxy(0, 30);
-        usleep(4000);
+
+		// versão com musica:
+		if(MUSICA_TEMA == 1){	
+			reproduzir(mp3);
+        	usleep(10000);
+		}
+		// versão sem musica:		
+		else{
+			usleep(50000);
+		}
+
     }
 
 	return 0;
@@ -96,15 +107,14 @@ void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, F
 
         posicao += jogador->velocidade;//altera a pos do jogador de acordo com sua velocidade
 
-        if(posicao<0){
-            posicao = COLUNAS_MAPA;
-        }
-        else if(posicao>=COLUNAS_MAPA){
+       	if(posicao>=COLUNAS_MAPA){
             posicao=0;
         }
 
-        if(kbhit())
+        if(kbhit()){
             controle(getchar(), jogador, tiro, mapa, posicao, &intervalo, &salvar_estado);
+		}
+
 
         if(salvar_estado==1){
             salvar_estado = 0;
@@ -122,11 +132,17 @@ void partida(int nivel, char nome_mapa[], boneco_t * jogador, int * pontuacao, F
 
         geraQuadro(mapa, posicao, jogador, inimigo, tiro, pontuacao, &inimigos_existentes, &animacao, &salvar_estado_mensagem, nivel);
 
-	if(mpg123_read(mp3.mh, mp3.buffer, mp3.buffer_size/6, &mp3.done) == MPG123_OK)
-	    ao_play(mp3.dev, mp3.buffer, mp3.done);
 
-        // 17000
-        usleep(2000);
+		// versão com musica:
+		if(MUSICA_TEMA == 1){
+			reproduzir(mp3);
+        	usleep(10000);
+		}
+		// versão sem musica:
+		else{ 
+			usleep(50000);
+		}
+
     }
 
     return;
@@ -152,7 +168,9 @@ void FIM_DE_JOGO(int score){
     printf("/.\u2734.\u2735.\u2736.\u2734.\u2734.\u2735.\u2736.\u2734.\u2735.\u2736.\u2735.\u2736.\u2734.\u2735.\u2736.\u2734.\u2734.\u2735.\u2736.\u2734.\u2735.\u2736.\u2735.\u2736./"); //tem que arrumar
 	printa(19, "Programação && Design");
     printa(20, "Matheus Costa        Terumi Tamai");
-	printa(22, "Musica");
-	printa(23, "David Bowie - Starman (8bits)");
+	if(MUSICA_TEMA == 1){
+		printa(22, "Musica");
+		printa(23, "David Bowie - Starman (8bits)");
+	}
     printa(29, "\n");
 }

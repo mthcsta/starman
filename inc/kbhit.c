@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <termios.h>
-#include <unistd.h>
-#include <fcntl.h>
-
 int kbhit(void)
 {
   struct termios oldt, newt;

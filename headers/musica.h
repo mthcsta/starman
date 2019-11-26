@@ -1,6 +1,10 @@
 #ifndef MUSICA_H
 #define MUSICA_H
 
+/*Includes para libao e libmpg123*/
+#include <ao/ao.h>
+#include <mpg123.h>
+
 typedef struct {
     mpg123_handle *mh;
     unsigned char *buffer;
@@ -10,5 +14,7 @@ typedef struct {
 } som;
 
 som musica();
+
+void reproduzir(som mp3);
 
 #endif

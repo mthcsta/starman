@@ -69,6 +69,7 @@ void geraQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, bonec
         printf("\u2B15\u25A3\u25A4\u2AFA");
 
     }
+
     /*** Gerando Inimigos ***/
     for(i=0; i<*inimigos_existentes; i++){
         posicao_inimigo = geraPosicao(inimigo[i].x, posicao);
@@ -79,6 +80,7 @@ void geraQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, bonec
             printf("\u25ED\u25EE");
         }
     }
+
     /*** Gerando Tiros ***/
     for(i=0; i<MAX_TIROS; i++){
         if(tiro[i].prop!=0){
@@ -89,35 +91,56 @@ void geraQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, bonec
             }
         }
     }
+
+
     /*** Gerando Paredes ***/
-	linha = 0;//contador de linhas_LINHAS_MAPA
-    while(linha<LINHAS_MAPA){ //enquanto nao chegar na ultima linha do mapa
-        coluna_tela = 0;//coluna da tela atual (36x105) eh zero
-        reposiciona_escrita=0; //n ha reposicionamento da escrita
-        coluna_mapa = posicao; //coluna do vetor do mapa (35x415) recebe o valor da posição da tela
-        gotoxy(coluna_tela, linha);//vai pra essa posição e imprime
-        while(coluna_tela<COLUNAS_TELA){//percorre a coluna
-            if(coluna_mapa>=COLUNAS_MAPA) 
-		coluna_mapa %= COLUNAS_MAPA; //zera periodicamente para repetir o início da tela
+	gotoxy(0,0); // posiciona para o inicio das paredes
 
-            if(ehParede(mapa, coluna_mapa, linha)){//se encontrar um caracter
-                if(reposiciona_escrita==1){ //aciona reposicionamento para escrita
-                    reposiciona_escrita=0;
-                    gotoxy(coluna_tela, linha);
-                }
+	if(COLUNAS_MAPA - posicao >= COLUNAS_TELA){ // checa se o mapa precisa ser lido o seu inicio
+		for(linha=0; linha<LINHAS_MAPA; linha++){ // percorre as linhas
+			reposiciona_escrita = 1; // variavel para auxiliar na reposição da escrita dos blocos
+			coluna_tela = 0; // coluna da tela atual(37x105) eh zero
+			for(coluna_mapa=posicao; coluna_tela<COLUNAS_TELA; coluna_mapa++, coluna_tela++){ // percorre a coluna
+				if(mapa[linha][coluna_mapa] == PAREDE){ // se encontrar uma parede
+					if(reposiciona_escrita == 1){ // aciona reposicionamento para escrita
+						reposiciona_escrita = 0;
+						gotoxy(coluna_tela, linha);
+					}
+					printf("\u2588");
+				}else{
+					reposiciona_escrita = 1; 
+				}
+			}
+			printf("\n");
+		}
+	}else{ // caso precise escrever o inicio da matriz do mapa junto do seu fim...
+		for(linha=0; linha<LINHAS_MAPA; linha++){ // percorre as linhas 
+			reposiciona_escrita = 1; // variavel para auxiliar na reposição da escrita dos blocos
+			coluna_tela = 0; // coluna da tela atual(37x105) eh zero
+			for(coluna_mapa=posicao; coluna_mapa<COLUNAS_MAPA; coluna_mapa++, coluna_tela++){ // percorre a coluna
+				if(mapa[linha][coluna_mapa] == PAREDE){ // se encontrar uma parede
+					if(reposiciona_escrita == 1){ // aciona reposicionamento para escrita
+						reposiciona_escrita = 0;
+						gotoxy(coluna_tela, linha);
+					}
+					printf("\u2588");
+				}else{
+					reposiciona_escrita = 1;
+				}
+			}
+			for(coluna_mapa=0; coluna_tela<COLUNAS_TELA; coluna_mapa++, coluna_tela++){ // percorre o resto da coluna
+				if(mapa[linha][coluna_mapa] == PAREDE){ // se encontrar uma parede
+					if(reposiciona_escrita == 1){ // aciona reposicionamento para escrita
+						reposiciona_escrita = 0;
+						gotoxy(coluna_tela, linha);
+					}
+					printf("\u2588");
+				}else{
+					reposiciona_escrita = 1;					
+				}
+			}
+			printf("\n");
+		}	
+	}
 
-                printf("\u2588");
-                coluna_tela++;
-                coluna_mapa++;
-            }else{
-                coluna_tela++;
-                coluna_mapa++;
-                reposiciona_escrita=1;
-            }
-        }
-        printf("\n");
-        linha++;
-    }
-    
-    
 }

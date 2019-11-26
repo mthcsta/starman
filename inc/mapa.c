@@ -1,16 +1,13 @@
-int existeMapa(int nivel){
-	char local_mapa[50];
+int existeMapa(int nivel, char local_mapa[]){
 	FILE * arq;
 
-	sprintf(local_mapa, MAPA_CAMINHO, nivel);
-
-	arq = fopen(local_mapa, "r");
-
-	if(arq==0){
-        return NIVEL_INEXISTENTE;
-    }
-
-	return nivel;
+	sprintf(local_mapa, MAPA_CAMINHO, nivel); // monta uma string do caminho do arquivo mapa + o numero do nivel
+	arq = fopen(local_mapa, "r"); // tenta abrir o arquivo de mapa com o nivel passado como parametro.
+	if(arq==0){ // caso o mapa não exista, retorna 0(falso)
+        return 0;
+    }else{ // caso exista, retorna 1(verdadeiro)
+		return 1; 
+	}
 }
 
 int geraMapa(FILE *arq, int mapa[][COLUNAS_MAPA], boneco_t *jogador, boneco_t inimigo[]){

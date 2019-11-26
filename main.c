@@ -4,20 +4,22 @@ int main(){
 
     int nivel=0;
 
-    char local_mapa[50];
+    char local_mapa[NOME_MAPA_TAMANHO];
 
     //inicializa a pontuação zerada
     int pontuacao=0;
     //inicializa o jogador no centro da tela com a velocidade mínima do jogo
-    boneco_t jogador = {0, 0, 3, VEL_MIN};
+    boneco_t jogador = {0, 0, JOGADOR_NVIDAS, VEL_MIN};
 
     //estado
     int selecionado = NOVO_JOGO;
     FILE *salve = NULL;
+    som mp3;
 	//fim das variáveis
-
-	som mp3 = musica();
-
+	
+	if(MUSICA_TEMA == 1){
+		mp3 = musica();
+	}
     // chama o MENU e recebe uma opção selecionada pelo usuario
     selecionado=MENU_INICIAL(mp3);
 
@@ -28,11 +30,8 @@ int main(){
         }
 
         //a partida perdura enquanto o jogador tiver vidas e ainda houver fases disponíveis
-        while(jogador.nvidas>0 && existeMapa(nivel) != NIVEL_INEXISTENTE){ 
-            
-            sprintf(local_mapa, MAPA_CAMINHO, nivel);
-
-            partida(nivel, local_mapa, &jogador, &pontuacao, salve, mp3);
+        while(jogador.nvidas>0 && existeMapa(nivel, local_mapa) == 1){
+            partida(nivel, local_mapa, &jogador, &pontuacao, salve, mp3); // abre a partida com o mapa encontrado;
             if(salve!=0){ // limpa a sujeira da variavel salve
                 salve = 0;
             }

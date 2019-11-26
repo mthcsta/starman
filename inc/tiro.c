@@ -57,7 +57,6 @@ void geraTiro(tiro_t tiro[], int prop, int x, int y){
     int i=0; //iterador
     int continua=1;//marca se o tiro sem prop ainda nao foi achado
 
-
     do{
         if(tiro[i].prop == 0){ //se o tiro da lista nao tem proprietatio
             tiro[i].prop = prop; //atribui sua propriedade pra chamada em questao
@@ -67,6 +66,6 @@ void geraTiro(tiro_t tiro[], int prop, int x, int y){
             continua=0; //tiro sem prop foi achado
         }
         i++;
-    } while(continua);//se o tiro sem prop foi achado e foi possivel atribuir sua prop, encerra laço
+    } while(continua && i<MAX_TIROS);//se o tiro sem prop foi achado e foi possivel atribuir sua prop, encerra laço
     return;
 }
