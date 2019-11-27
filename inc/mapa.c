@@ -1,3 +1,6 @@
+/********************int existeMapa********************/
+/*   verifica se existe um mapa para ser aberto      */
+/****************************************************/
 int existeMapa(int nivel, char local_mapa[]){
 	FILE * arq;
 
@@ -6,10 +9,13 @@ int existeMapa(int nivel, char local_mapa[]){
 	if(arq==0){ // caso o mapa não exista, retorna 0(falso)
         return 0;
     }else{ // caso exista, retorna 1(verdadeiro)
-		return 1; 
+		return 1;
 	}
 }
-
+/********************int geraMapa********************/
+/* gera uma matriz com os dados do arquivo de texto */
+/* do mapa                                          */
+/****************************************************/
 int geraMapa(FILE *arq, int mapa[][COLUNAS_MAPA], boneco_t *jogador, boneco_t inimigo[]){
     int y=0, x=0; // iteradores
     int id=0; // id do inimigo que sera inserido

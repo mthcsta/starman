@@ -1,3 +1,8 @@
+/**************************void listaClassificados**************************/
+/* lista os classificados encontrados no classificados.bin                */
+/*                                                                       */
+/************************************************************************/
+
 void listaClassificados(int linhaInicio){
 	int linha = linhaInicio;
 	int i;
@@ -19,17 +24,20 @@ void listaClassificados(int linhaInicio){
 	return;
 }
 
-
+/**************************void classifica**************************/
+/*  Confere a pontuação do jogador com os ja classificados         */
+/*  Classifica o jogador de acordo com sua pontuação               */
+/********************************************************************/
 int classifica(int pontuacao){
 	int buscando = 1;
 	int posicao=0;
 	char nome[NOME_TAMANHO_MAXIMO];
 
 	class_t classificados[LIMITE_CLASSIFICADOS];
-	
-	// faz uma busca dos jogadores ja classificados e insere num vetor 
+
+	// faz uma busca dos jogadores ja classificados e insere num vetor
 	buscaClassificados(classificados);
-	
+
 	// verifica se o jogador se encaixa em alguma das classificacoes de acordo com sua pontuacao
 	do{
 		if(classificados[posicao].pontuacao < pontuacao){
@@ -50,20 +58,23 @@ int classifica(int pontuacao){
 		printa(7, "");
 		fgets(nome, NOME_TAMANHO_MAXIMO, stdin);
 		if(nome[strlen(nome)-1] == '\n'){
-			nome[strlen(nome)-1]='\0';		
+			nome[strlen(nome)-1]='\0';
 		}
 		insereClassificado(classificados, posicao, pontuacao, nome);
 		return 1;
 	}
 	return 0;
 }
-
+/***********************void insereClassificado***********************/
+/*  Insere o novo classificado na sua posição e                      */
+/*   reposiciona os classificados abaixo dele(se houver)             */
+/********************************************************************/
 void insereClassificado(class_t classificado[], int posicao, int pontuacao, char nome[]){
 	int i;
 	int j;
 	FILE *arq;
 	arq = fopen(CLASSIFICADOS_ARQUIVO, "w");
-	
+
 	class_t novo_classificado;
 	strcpy(novo_classificado.nome, nome);
 	novo_classificado.pontuacao = pontuacao;
@@ -78,7 +89,10 @@ void insereClassificado(class_t classificado[], int posicao, int pontuacao, char
 	}
 	fclose(arq);
 }
-
+/*************************void buscaClassificados***********************/
+/*      busca pelos classificados antigos, se não houver, cria         */
+/*   um arquivo com classificados ja definidos, e os guarda num vetor */
+/********************************************************************/
 void buscaClassificados(class_t classificado[]){
 	FILE *arq;
 	arq = fopen(CLASSIFICADOS_ARQUIVO, "r");
@@ -86,17 +100,19 @@ void buscaClassificados(class_t classificado[]){
 		geraArquivoClassificados();
 		return buscaClassificados(classificado);
 	}
-	
+
 	fread(classificado, sizeof(class_t), LIMITE_CLASSIFICADOS, arq);
-	
+
 	return;
 }
-
+/**************************void geraArquivoClassificaos**************************/
+/*  Função que cria o arquivo de classificados com classificados ja definidos */
+/******************************************************************************/
 void geraArquivoClassificados(){
 	FILE *arq;
 	arq = fopen(CLASSIFICADOS_ARQUIVO, "w");
 	class_t classificados[LIMITE_CLASSIFICADOS] = {{"DavidBowie", 500}, {"MajorTom", 200}, {"DenRitchie", 30}};
 	fwrite(classificados, sizeof(class_t), LIMITE_CLASSIFICADOS, arq);
 	fclose(arq);
-	return;	
+	return;
 }

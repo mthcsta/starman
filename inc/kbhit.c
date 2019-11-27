@@ -1,3 +1,7 @@
+/**************************int kbhit**************************/
+/*  Função kbhit para receber os comandos do teclado        */
+/***********************************************************/
+
 int kbhit(void)
 {
   struct termios oldt, newt;

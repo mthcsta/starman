@@ -4,6 +4,10 @@
 #include <stdlib.h>
 #include <math.h>
 
+/********************************auxiliares********************************/
+/*funções padrão auxiliares que serão chamadas ao longo do programa      */
+/*************************************************************************/
+
 //sorteia entre um numero minimo e máximo
 int MinMax(int min, int max){
     return (min + (rand() % (max-min+1)));

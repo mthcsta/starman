@@ -1,7 +1,10 @@
-/***atualiza a Quadro***/
+/**************************void atualizaQuadro**************************/
+/*contem todos os dados que sofrem alterações no decorrer do jogo.    */
+/*Inimigo, jogador, tiro, posição da tela, ...atualiza os dados      */
+/********************************************************************/
 void atualizaQuadro(int mapa[][COLUNAS_MAPA], int posicao, int *pontuacao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *inimigos_existentes, int *animacao, int *intervalo, int *salvar_estado_mensagem){
     int i; // iterador
-	
+
 	// busca todos os tiros existentes no jogo e faz uma checagem
 	// se está na mesma posição que um jogador ou inimigo
 	// caso esteja, tira a vida dele.
@@ -19,13 +22,13 @@ void atualizaQuadro(int mapa[][COLUNAS_MAPA], int posicao, int *pontuacao, bonec
     if( ehParede(mapa, jogador->x+posicao+0, jogador->y) || //se a pos x do jogador é igual a da parede de trás OU
         ehParede(mapa, jogador->x+posicao+1, jogador->y) || //se as partes internas
 		ehParede(mapa, jogador->x+posicao+2, jogador->y) || // da nave estão numa parede.
-		ehParede(mapa, jogador->x+posicao+3, jogador->y) 
+		ehParede(mapa, jogador->x+posicao+3, jogador->y)
 	  ){ //se a pos x do jogador é igual a da parede da frente
-		
+
 		if(*animacao==0){ // e se o jogador deixou de piscar
 			jogador->nvidas--; //o jogador perde uma vida
 	        *animacao = DURACAO_ANIMACAO; //a perda da vida é sinalizada por animação
-		} 
+		}
         jogador->y = buscaParede(mapa, jogador->x+posicao+4, 0, 1, 0) + 2; // a posição do jogador é redefinida para um lugar aberto sem parede.
         jogador->velocidade = VEL_MIN; // o jogador volta para a velocidade minima
     }
@@ -33,8 +36,8 @@ void atualizaQuadro(int mapa[][COLUNAS_MAPA], int posicao, int *pontuacao, bonec
 	// Checando os inimigos existentes:
     for(i=0; i<*inimigos_existentes; i++){
 		// Checando se o inimigo está encostando no jogador:
-		//  
-        if( *animacao==0 && 
+		//
+        if( *animacao==0 &&
 	    jogador->x+posicao+0 <= inimigo[i].x+1 && jogador->x+posicao+3 >= inimigo[i].x && //verifica se o jogador e inimigo estão na mesma pos x
             (fabs(jogador->y - inimigo[i].y) <= 1)){ //verifica o modulo da distancia vertical entre inimigo e jogador
             jogador->nvidas--; // se o jogador estiver dentro da parte visual do inimigo, jogador perde uma vida.
@@ -63,7 +66,10 @@ void atualizaQuadro(int mapa[][COLUNAS_MAPA], int posicao, int *pontuacao, bonec
     }
     return;
 }
-
+/****************************void geraQuadro****************************/
+/*Função para desenhar a tela                                         */
+/*              Exibe os dados que a atualizaQuadro atualiza         */
+/********************************************************************/
 void geraQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, boneco_t inimigo[], tiro_t tiro[], int *pontuacao, int *inimigos_existentes, int *animacao, int *salvar_estado_mensagem, int nivel){
     int i, linha=0, coluna_tela=0, coluna_mapa=0, reposiciona_escrita=0, posicao_inimigo;
 
@@ -121,13 +127,13 @@ void geraQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, bonec
 					}
 					printf("\u2588");
 				}else{
-					reposiciona_escrita = 1; 
+					reposiciona_escrita = 1;
 				}
 			}
 			printf("\n");
 		}
 	}else{ // caso precise escrever o inicio da matriz do mapa junto do seu fim...
-		for(linha=0; linha<LINHAS_MAPA; linha++){ // percorre as linhas 
+		for(linha=0; linha<LINHAS_MAPA; linha++){ // percorre as linhas
 			reposiciona_escrita = 1; // variavel para auxiliar na reposição da escrita dos blocos
 			coluna_tela = 0; // coluna da tela atual(37x105) eh zero
 			for(coluna_mapa=posicao; coluna_mapa<COLUNAS_MAPA; coluna_mapa++, coluna_tela++){ // percorre a coluna
@@ -149,11 +155,11 @@ void geraQuadro(int mapa[][COLUNAS_MAPA], int posicao, boneco_t * jogador, bonec
 					}
 					printf("\u2588");
 				}else{
-					reposiciona_escrita = 1;					
+					reposiciona_escrita = 1;
 				}
 			}
 			printf("\n");
-		}	
+		}
 	}
 
 }

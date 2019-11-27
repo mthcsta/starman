@@ -1,5 +1,5 @@
 #include <stdio.h>
-/*************************************************************************************/
+/**********************************void salvarEstado**********************************/
 /* * * * * * * * * * * * * * * SALVA O ESTADO DO JOGO * * * * * * * * * * * * * * *  */
 /* * *   Escreve no arquivo SALVE_ARQUIVO o estado atual do jogo:                * * */
 /*	Nivel, posição do jogador, pontuação, inimigos restantes e suas posições,        */
@@ -30,11 +30,13 @@ void salvarEstado(int nivel, int posicao, boneco_t jogador, int pontuacao, tiro_
 FILE * carregarNivelEstado(int *nivel){
 	FILE *salve;
 	salve = fopen(SALVE_ARQUIVO, "r");
-	
-	fread(nivel, sizeof(int), 1, salve);	
-	
-	return salve;	
+
+	fread(nivel, sizeof(int), 1, salve);
+
+	return salve;
 }
+
+
 void carregarEstado(FILE * salve, int *posicao, boneco_t *jogador, int *pontuacao, tiro_t tiro[], int *inimigos_existentes, boneco_t inimigo[], int *animacao, int *intervalo){
     fread(posicao, sizeof(int), 1, salve);
     fread(jogador, sizeof(boneco_t), 1, salve);

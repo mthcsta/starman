@@ -1,4 +1,7 @@
-/***gera os inimigos na tela***/
+/********************boneco_t carregaInimigo********************/
+/*              gera os inimigos na tela                      */
+/*************************************************************/
+
 boneco_t carregaInimigo(int x, int y){
     boneco_t inimigo;
 
@@ -12,6 +15,9 @@ boneco_t carregaInimigo(int x, int y){
     return inimigo;
 }
 
+/**********************void atualizaInimigo**********************/
+/*              reposiciona o inimigo na tela                  */
+/*************************************************************/
 void atualizaInimigo(int mapa[][COLUNAS_MAPA], boneco_t *inimigo, boneco_t *jogador){
     int minimo = 1, maximo = 5;//variaveis para sorteio de movimento
     int andou_x=0;
@@ -69,7 +75,9 @@ void atualizaInimigo(int mapa[][COLUNAS_MAPA], boneco_t *inimigo, boneco_t *joga
     }
     return;
 }
-
+/***********************void deletaInimigo***********************/
+/*              Remove os inimigos mortos da lista             */
+/*************************************************************/
 void deletaInimigo(boneco_t inimigo[], int morto, int *inimigos_existentes){
     inimigo[morto] = inimigo[*inimigos_existentes-1]; //puxa o último inimigo vivo pra posicao do eliminado
     *inimigos_existentes -= 1; //elimina o inimigo da ultima pos (pq ele foi passado pra frente)

@@ -1,11 +1,13 @@
+/**************************void controlePartida**************************/
+/*controle para a função partida                                       */
+/*Movimenta a nave e atira de acordo com a entrada do teclado         */
+/********************************************************************/
 
-/*---------------Controle para a função Partida()-------------------*/
-/***Movimenta a nave e atira de acordo com a entrada do teclado***/
 void controlePartida(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNAS_MAPA], int posicao, int *intervalo, int *salvar_estado){
 
     c = tolower(c); //evita que o controle nao funcione caso o capslock esteja ativado
-	
-  
+
+
     switch(c){
         case 's': //se a entrada eh a tecla s
             if(!ehParede(mapa, jogador->x+posicao, jogador->y+1)){//caso a prox pos pra baixo do jogador nao seja PAREDE
@@ -47,9 +49,11 @@ void controlePartida(int c, boneco_t * jogador, tiro_t tiro[], int mapa[][COLUNA
     }
     return;
 }
+/**************************int controleMenu**************************/
+/* Controle para a gunção MENU_INICIAL()                            */
+/* Movimenta a seta no menu de acordo com a entrada do teclado      */
+/********************************************************************/
 
-/*---------------Controle para a função MENU_INICIAL()-------------------*/
-/***Movimento a seta no menu de acordo com a entrada do teclado***/
 int controleMenu(int c, int *selecionado_indice){
 	c = tolower(c);
     switch(c){//o char eh convertido em minúsculo pra evitar erro de Capslock

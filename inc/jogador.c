@@ -1,3 +1,7 @@
+/********************int geraPosicao********************/
+/*posiciona as estruturas do jogador e inimigo de      */
+/*  acordo com a matriz mapa                           */
+/*******************************************************/
 int geraPosicao(int x, int posicao){
     int reposicao = x - posicao;
     if(posicao <= (COLUNAS_MAPA - COLUNAS_TELA) && reposicao>0 && x<COLUNAS_TELA+posicao-1){

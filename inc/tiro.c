@@ -1,7 +1,10 @@
-/**
- * Verifica as posicoes relativas entre o jogador e o tiro do inimigo, e entre o inimigo e o tiro do jogador.
- * Computa os pontos ganhos a cada inimigo morto e as vidas perdidas por tiros do inimigo.
-**/
+/****************************void buscaTiro****************************/
+/*Verifica as posicoes relativas entre o jogador e o tiro do inimigo,*/
+/* e entre o inimigo e o tiro do jogador.                            */
+/*Computa os pontos ganhos a cada inimigo morto e as vidas           */
+/* perdidas por tiros do inimigo.                                   */
+/********************************************************************/
+
 void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[],int posicao, int * pontuacao, int *inimigos_existentes, int *animacao){
     int i, j; // iteradores
 
@@ -47,12 +50,12 @@ void buscaTiro(boneco_t *jogador, boneco_t inimigo[], tiro_t tiro[],int posicao,
     }
     return;
 }
-/**************************************************************/
-/**função padrao que gera tiros para jogador e inimigo.     **/
-/**Recebe uma lista de tiros, o proprietário e as pos x e y**/
-/**Jogador: chamada na controle.c com entrada do teclado  **/
-/**Inimigo: chamada na quadro.c com uma função de sorteio**/
-/*********************************************************/
+/************************void geraTiro***********************/
+/*função padrao que gera tiros para jogador e inimigo.     */
+/*Recebe uma lista de tiros, o proprietário e as pos x e y*/
+/*Jogador: chamada na controle.c com entrada do teclado  */
+/*Inimigo: chamada na quadro.c com uma função de sorteio*/
+/*******************************************************/
 void geraTiro(tiro_t tiro[], int prop, int x, int y){
     int i=0; //iterador
     int continua=1;//marca se o tiro sem prop ainda nao foi achado
